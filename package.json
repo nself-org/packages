@@ -16,6 +16,7 @@
     "@graphql-codegen/cli": "^7.1.2",
     "@graphql-codegen/client-preset": "^6.0.1",
     "@types/node": "^22",
+    "expo-doctor": "^1.19.10",
     "graphql": "^16.9.0",
     "lefthook": "^2.1.9",
     "license-checker": "^25.0.1",
