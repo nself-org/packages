@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "storybook": "pnpm exec storybook dev -p 6008",
-    "storybook:build": "pnpm exec storybook build"
+    "storybook": "../../node_modules/.pnpm/node_modules/.bin/storybook dev -p 6008",
+    "storybook:build": "../../node_modules/.pnpm/node_modules/.bin/storybook build"
   },
   "dependencies": {
     "clsx": "^2",
@@ -40,6 +40,7 @@
     "@nself/errors": "workspace:*",
     "@nself/i18n": "workspace:*",
     "@nself/observability": "workspace:*",
+    "storybook": "^8",
     "@storybook/react": "^8",
     "@storybook/react-vite": "^8",
     "@storybook/addon-essentials": "^8",

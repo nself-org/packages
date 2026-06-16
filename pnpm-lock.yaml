@@ -305,6 +305,9 @@ importers:
       jsdom:
         specifier: ^25
         version: 25.0.1
+      storybook:
+        specifier: ^8
+        version: 8.6.18
       tsup:
         specifier: ^8
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@6.0.3)(yaml@2.9.0)
