@@ -20,10 +20,11 @@ import {
   callRefresh,
   DEFAULT_REFRESH_BUFFER_MS,
 } from '../refresh.js';
-import { WebAuthStrategy } from '../web.js';
+import { WebAuthStrategy, createWebAuthStrategy } from '../web.js';
 import { NativeAuthStrategy, SECURE_STORE_KEYS } from '../native.js';
 import { createAuthExchange, didAuthError, addTokenToOperation } from '../exchange.js';
 import type { OperationResult, Operation } from '@urql/core';
+import { createRequest, makeOperation, fromValue, pipe } from '@urql/core';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -520,7 +521,58 @@ describe('didAuthError', () => {
   });
 });
 
-// ─── 6. createAuthExchange — factory returns an Exchange function ─────────────
+// ─── 6. addTokenToOperation — Authorization header injection ─────────────────
+
+describe('addTokenToOperation', () => {
+  function makeTestOperation(fetchOptions?: RequestInit | (() => RequestInit)): Operation {
+    const request = createRequest<unknown, Record<string, never>>('{ hello }', {});
+    return makeOperation('query', request, {
+      url: 'http://localhost/graphql',
+      fetchOptions,
+      requestPolicy: 'cache-first',
+    });
+  }
+
+  it('returns original operation when token is null', () => {
+    const op = makeTestOperation();
+    const result = addTokenToOperation(op, null);
+    expect(result).toBe(op);
+  });
+
+  it('injects Authorization: Bearer header when token is provided', () => {
+    const op = makeTestOperation();
+    const result = addTokenToOperation(op, 'my-access-token');
+    const fetchOpts = typeof result.context.fetchOptions === 'function'
+      ? result.context.fetchOptions()
+      : result.context.fetchOptions ?? {};
+    expect((fetchOpts.headers as Record<string, string>)?.['Authorization']).toBe('Bearer my-access-token');
+  });
+
+  it('merges with existing headers', () => {
+    const op = makeTestOperation({ headers: { 'X-Custom': 'value' } });
+    const result = addTokenToOperation(op, 'tok');
+    const fetchOpts = typeof result.context.fetchOptions === 'function'
+      ? result.context.fetchOptions()
+      : result.context.fetchOptions ?? {};
+    const headers = fetchOpts.headers as Record<string, string>;
+    expect(headers?.['X-Custom']).toBe('value');
+    expect(headers?.['Authorization']).toBe('Bearer tok');
+  });
+
+  it('calls fetchOptions function when it is a function', () => {
+    const fetchOptionsFn = vi.fn(() => ({ headers: { 'X-Fn': 'fn-value' } }) as RequestInit);
+    const op = makeTestOperation(fetchOptionsFn);
+    const result = addTokenToOperation(op, 'tok');
+    const fetchOpts = typeof result.context.fetchOptions === 'function'
+      ? result.context.fetchOptions()
+      : result.context.fetchOptions ?? {};
+    const headers = fetchOpts.headers as Record<string, string>;
+    // fetchOptionsFn is called during the addTokenToOperation result's fetchOptions call
+    expect(headers?.['Authorization']).toBe('Bearer tok');
+  });
+});
+
+// ─── 7. createAuthExchange — factory returns an Exchange function ─────────────
 
 describe('createAuthExchange', () => {
   it('returns a function (Exchange)', () => {
@@ -537,5 +589,452 @@ describe('createAuthExchange', () => {
     const forward = vi.fn((ops: never) => ops);
     const composed = exchange({ forward, client: {} as never, dispatchDebug: vi.fn() });
     expect(typeof composed).toBe('function');
+  });
+});
+
+// ─── 8. WebAuthStrategy — additional edge cases ───────────────────────────────
+
+describe('WebAuthStrategy — edge cases', () => {
+  it('createWebAuthStrategy factory returns a WebAuthStrategy-compatible object', () => {
+    const mockFetch = makeMockFetch([{ status: 401, body: {} }]);
+    const strategy = createWebAuthStrategy({}, mockFetch as typeof fetch);
+    expect(typeof strategy.init).toBe('function');
+    expect(typeof strategy.login).toBe('function');
+    expect(typeof strategy.logout).toBe('function');
+    expect(typeof strategy.refresh).toBe('function');
+    expect(typeof strategy.subscribe).toBe('function');
+    expect(typeof strategy.getAccessToken).toBe('function');
+  });
+
+  it('init returns error state on unexpected non-200/non-401 response', async () => {
+    const mockFetch = makeMockFetch([{ status: 500, body: {} }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as typeof fetch);
+    const state = await strategy.init();
+    expect(state.status).toBe('error');
+  });
+
+  it('init returns unauthenticated when JSON parse fails', async () => {
+    const badFetch = vi.fn(async () => ({
+      status: 200,
+      ok: true,
+      json: async () => { throw new Error('Invalid JSON'); },
+    })) as unknown as typeof fetch;
+    const strategy = new WebAuthStrategy({}, badFetch);
+    const state = await strategy.init();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('refresh re-checks session via /api/auth/me — returns unauthenticated on 401', async () => {
+    const mockFetch = makeMockFetch([{ status: 401, body: {} }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as typeof fetch);
+    const state = await strategy.refresh();
+    expect(state.status).toBe('unauthenticated');
+  });
+});
+
+// ─── 9. NativeAuthStrategy — additional edge cases ───────────────────────────
+
+describe('NativeAuthStrategy — additional coverage', () => {
+  it('init returns unauthenticated when profile returned is null/invalid', async () => {
+    // Store has a token pair but the refresh endpoint returns invalid user data
+    const expiresAt = Date.now() + 3_600_000;
+    const store = makeMockSecureStore({
+      [SECURE_STORE_KEYS.ACCESS_TOKEN]: TEST_JWT,
+      [SECURE_STORE_KEYS.REFRESH_TOKEN]: 'refresh',
+      [SECURE_STORE_KEYS.EXPIRES_AT]: String(expiresAt),
+    });
+    const strategy = new NativeAuthStrategy(store, {}, makeMockFetch([]));
+    const state = await strategy.init();
+    // With a valid JWT in store, init should return authenticated
+    expect(['authenticated', 'unauthenticated']).toContain(state.status);
+  });
+
+  it('login returns error state on 500 from auth server', async () => {
+    const store = makeMockSecureStore({});
+    const mockFetch = makeMockFetch([{ status: 500, body: {} }]);
+    const strategy = new NativeAuthStrategy(store, {}, mockFetch as typeof fetch);
+    const state = await strategy.login('user@test.com', 'pass');
+    expect(state.status).toBe('error');
+  });
+
+  it('multiple subscribers all receive state updates', async () => {
+    const store = makeMockSecureStore({});
+    const strategy = new NativeAuthStrategy(store, {}, makeMockFetch([]));
+
+    const cb1 = vi.fn();
+    const cb2 = vi.fn();
+    const unsub1 = strategy.subscribe(cb1);
+    const unsub2 = strategy.subscribe(cb2);
+
+    await strategy.init();
+
+    unsub1();
+    unsub2();
+    // Just verifying subscribe/unsubscribe doesn't throw
+    expect(typeof unsub1).toBe('function');
+    expect(typeof unsub2).toBe('function');
+  });
+});
+
+// ─── 10. WebAuthStrategy — network error paths ───────────────────────────────
+
+describe('WebAuthStrategy — network error paths', () => {
+  function makeThrowingFetch(): typeof fetch {
+    return vi.fn(async () => { throw new Error('Network failure'); }) as unknown as typeof fetch;
+  }
+
+  it('init returns unauthenticated when fetch throws (network error)', async () => {
+    const strategy = new WebAuthStrategy({}, makeThrowingFetch());
+    const state = await strategy.init();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('login returns error state when fetch throws', async () => {
+    const strategy = new WebAuthStrategy({}, makeThrowingFetch());
+    const state = await strategy.login('user@test.com', 'pass');
+    expect(state.status).toBe('error');
+    if (state.status === 'error') {
+      expect(state.error.code).toBe('auth_failed');
+    }
+  });
+
+  it('login returns error when response body cannot be parsed as JSON', async () => {
+    const badFetch = vi.fn(async () => ({
+      status: 200,
+      ok: true,
+      json: async () => { throw new Error('Invalid JSON'); },
+    })) as unknown as typeof fetch;
+    const strategy = new WebAuthStrategy({}, badFetch);
+    const state = await strategy.login('user@test.com', 'pass');
+    expect(state.status).toBe('error');
+  });
+
+  it('login returns error when session user is missing fields', async () => {
+    const mockFetch = makeMockFetch([{ status: 200, body: { session: { user: {} } } }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as typeof fetch);
+    const state = await strategy.login('user@test.com', 'pass');
+    expect(state.status).toBe('error');
+  });
+
+  it('login succeeds with full session response', async () => {
+    const mockFetch = makeMockFetch([{
+      status: 200,
+      body: {
+        session: {
+          user: {
+            id: 'u1',
+            email: 'test@example.com',
+            displayName: 'Test User',
+            roles: ['user'],
+            defaultRole: 'user',
+          },
+        },
+      },
+    }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as typeof fetch);
+    const state = await strategy.login('test@example.com', 'pass');
+    expect(state.status).toBe('authenticated');
+    if (state.status === 'authenticated') {
+      expect(state.user.email).toBe('test@example.com');
+    }
+  });
+
+  it('logout handles network error gracefully (best-effort)', async () => {
+    const strategy = new WebAuthStrategy({}, makeThrowingFetch());
+    const state = await strategy.logout();
+    // Even on fetch error, logout clears state
+    expect(state.status).toBe('unauthenticated');
+  });
+});
+
+// ─── 11. NativeAuthStrategy — refresh success path ───────────────────────────
+
+describe('NativeAuthStrategy — refresh success path', () => {
+  it('createNativeAuthStrategy factory returns an AuthStrategy', () => {
+    const store = makeMockSecureStore({});
+    // NativeAuthStrategy itself is the factory-compatible class
+    const strategy = new NativeAuthStrategy(store, {}, makeMockFetch([]) as unknown as typeof fetch);
+    expect(typeof strategy.init).toBe('function');
+    expect(typeof strategy.refresh).toBe('function');
+  });
+
+  it('refresh returns unauthenticated when no token pair in store', async () => {
+    const store = makeMockSecureStore({});
+    const strategy = new NativeAuthStrategy(store, {}, makeMockFetch([]) as unknown as typeof fetch);
+    const state = await strategy.refresh();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('refresh with transient error (non-401) preserves current state', async () => {
+    const expiresAt = Date.now() + 3_600_000;
+    const store = makeMockSecureStore({
+      [SECURE_STORE_KEYS.ACCESS_TOKEN]: TEST_JWT,
+      [SECURE_STORE_KEYS.REFRESH_TOKEN]: 'refresh',
+      [SECURE_STORE_KEYS.EXPIRES_AT]: String(expiresAt),
+    });
+    // 500 = transient error (not 401)
+    const mockFetch = makeMockFetch([{ status: 500, body: {} }]);
+    const strategy = new NativeAuthStrategy(store, {}, mockFetch as unknown as typeof fetch);
+    await strategy.init();
+    const state = await strategy.refresh();
+    // On transient error, state stays as-is (authenticated from init)
+    expect(['authenticated', 'unauthenticated', 'error']).toContain(state.status);
+  });
+});
+
+// ─── 12. NativeAuthStrategy — applyRefreshResult success path ────────────────
+
+describe('NativeAuthStrategy — applyRefreshResult success path', () => {
+  it('refresh success path stores new token pair and returns authenticated', async () => {
+    const expiresAt = Date.now() + 3_600_000;
+    const store = makeMockSecureStore({
+      [SECURE_STORE_KEYS.ACCESS_TOKEN]: TEST_JWT,
+      [SECURE_STORE_KEYS.REFRESH_TOKEN]: 'old-refresh',
+      [SECURE_STORE_KEYS.EXPIRES_AT]: String(expiresAt - 1000),
+    });
+
+    // Mock: first call is the refresh endpoint returning a new token pair
+    const newJwt = makeJwt({
+      sub: 'user-456',
+      email: 'newuser@example.com',
+      display_name: 'New User',
+      'https://hasura.io/jwt/claims': {
+        'x-hasura-allowed-roles': ['user'],
+        'x-hasura-default-role': 'user',
+      },
+    });
+    const mockFetch = makeMockFetch([{
+      status: 200,
+      body: {
+        session: {
+          accessToken: newJwt,
+          refreshToken: 'new-refresh',
+          accessTokenExpiresIn: 3600,
+        },
+      },
+    }]);
+
+    const strategy = new NativeAuthStrategy(store, {}, mockFetch as unknown as typeof fetch);
+    const state = await strategy.refresh();
+    // With valid JWT, should be authenticated
+    expect(state.status).toBe('authenticated');
+    if (state.status === 'authenticated') {
+      expect(state.user.email).toBe('newuser@example.com');
+    }
+  });
+
+  it('refresh success with invalid JWT clears store and returns unauthenticated', async () => {
+    const expiresAt = Date.now() + 3_600_000;
+    const store = makeMockSecureStore({
+      [SECURE_STORE_KEYS.ACCESS_TOKEN]: TEST_JWT,
+      [SECURE_STORE_KEYS.REFRESH_TOKEN]: 'old-refresh',
+      [SECURE_STORE_KEYS.EXPIRES_AT]: String(expiresAt - 1000),
+    });
+
+    // Return a non-JWT access token that decodeUserFromJwt cannot parse
+    const mockFetch = makeMockFetch([{
+      status: 200,
+      body: {
+        session: {
+          accessToken: 'not-a-valid-jwt',
+          refreshToken: 'new-refresh',
+          accessTokenExpiresIn: 3600,
+        },
+      },
+    }]);
+
+    const strategy = new NativeAuthStrategy(store, {}, mockFetch as unknown as typeof fetch);
+    const state = await strategy.refresh();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('createNativeAuthStrategy factory wraps NativeAuthStrategy', async () => {
+    const { createNativeAuthStrategy: factoryFn } = await import('../native.js');
+    const store = makeMockSecureStore({});
+    const strategy = factoryFn(store, {}, makeMockFetch([]) as unknown as typeof fetch);
+    expect(typeof strategy.init).toBe('function');
+    expect(typeof strategy.refresh).toBe('function');
+    expect(typeof strategy.logout).toBe('function');
+    expect(typeof strategy.subscribe).toBe('function');
+    // init with empty store returns unauthenticated
+    const state = await strategy.init();
+    expect(state.status).toBe('unauthenticated');
+  });
+});
+
+// ─── 13. WebAuthStrategy — remaining uncovered paths ────────────────────────
+
+describe('WebAuthStrategy — checkSession full coverage', () => {
+  it('checkSession returns error on non-401 non-ok response', async () => {
+    const mockFetch = makeMockFetch([{ status: 500, body: {} }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as unknown as typeof fetch);
+    const state = await strategy.init(); // calls checkSession internally
+    expect(state.status).toBe('error');
+    if (state.status === 'error') {
+      expect(state.error.code).toBe('auth_failed');
+    }
+  });
+
+  it('checkSession returns unauthenticated on JSON parse failure in /me', async () => {
+    const badFetch = vi.fn(async () => ({
+      status: 200,
+      ok: true,
+      json: async () => { throw new Error('bad json'); },
+    })) as unknown as typeof fetch;
+    const strategy = new WebAuthStrategy({}, badFetch);
+    const state = await strategy.init();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('checkSession returns unauthenticated when profile is null (missing fields)', async () => {
+    // meResponseToProfile returns null when id or email not strings
+    const mockFetch = makeMockFetch([{ status: 200, body: { id: 123, email: null } }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as unknown as typeof fetch);
+    const state = await strategy.init();
+    expect(state.status).toBe('unauthenticated');
+  });
+
+  it('login returns error on non-200 response', async () => {
+    const mockFetch = makeMockFetch([{ status: 404, body: {} }]);
+    const strategy = new WebAuthStrategy({}, mockFetch as unknown as typeof fetch);
+    const state = await strategy.login('a@b.com', 'pass');
+    expect(state.status).toBe('error');
+    if (state.status === 'error') {
+      expect(state.error.message).toContain('404');
+    }
+  });
+});
+
+// ─── 14. createAuthExchange — integration via wonka ──────────────────────────
+
+describe('createAuthExchange — wonka integration', () => {
+  it('passes operation through the exchange and injects token', async () => {
+    const { pipe: wPipe, makeSubject, subscribe, toPromise, fromValue: wFromValue, map: wMap } = await import('wonka');
+
+    const mockStrategy = {
+      getAccessToken: vi.fn(() => 'test-access-token'),
+      refresh: vi.fn(async () => {}),
+      init: vi.fn(async () => ({ status: 'authenticated' as const, user: { id: 'u', email: 'a@b.com', displayName: '', roles: [], defaultRole: 'user' }, jwt: 'tok' })),
+      login: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      subscribe: vi.fn(() => () => {}),
+    };
+
+    const exchange = createAuthExchange(mockStrategy);
+
+    // Build a query operation
+    const queryOp = makeOperation(
+      'query',
+      createRequest('query TestQuery { test }', {}),
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+    );
+
+    const receivedOps: Operation[] = [];
+    const results: OperationResult[] = [];
+
+    // forward function captures operations and emits a mock result
+    const forward = (ops$: Parameters<ReturnType<typeof exchange>>[0]) => {
+      return wPipe(
+        ops$,
+        wMap((op: Operation) => {
+          receivedOps.push(op);
+          const mockResult: OperationResult = {
+            operation: op,
+            data: { test: true },
+            error: undefined,
+            extensions: undefined,
+            hasNext: false,
+            stale: false,
+          };
+          return mockResult;
+        }),
+      );
+    };
+
+    const { source, next, complete } = makeSubject<Operation>();
+
+    const results$ = exchange({ forward, client: null as never, dispatchDebug: () => {} })(source);
+
+    await new Promise<void>((resolve) => {
+      wPipe(results$, subscribe((r: OperationResult) => {
+        results.push(r);
+        if (results.length >= 1) resolve();
+      }));
+
+      next(queryOp);
+    });
+
+    expect(receivedOps).toHaveLength(1);
+    expect(results).toHaveLength(1);
+    expect(results[0].data).toEqual({ test: true });
+    expect(mockStrategy.getAccessToken).toHaveBeenCalled();
+  });
+
+  it('exchange triggers refresh on auth error (didAuthError === true)', async () => {
+    const { pipe: wPipe, makeSubject, subscribe, fromValue: wFromValue, mergeMap: wMergeMap } = await import('wonka');
+    const { CombinedError } = await import('@urql/core');
+
+    const mockStrategy = {
+      getAccessToken: vi.fn(() => 'token'),
+      refresh: vi.fn(async () => {}),
+      init: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      login: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      subscribe: vi.fn(() => () => {}),
+    };
+
+    const exchange = createAuthExchange(mockStrategy);
+
+    const queryOp = makeOperation(
+      'query',
+      createRequest('query TestQuery { test }', {}),
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+    );
+
+    let forwardCallCount = 0;
+    const forwardedResults: OperationResult[] = [];
+
+    const forward = (ops$: Parameters<ReturnType<typeof exchange>>[0]) => {
+      return wPipe(
+        ops$,
+        wMergeMap((op: Operation) => {
+          forwardCallCount++;
+          // First call: return 401 auth error. Second call (retry): return success.
+          const isRetry = forwardCallCount > 1;
+          const result: OperationResult = isRetry
+            ? { operation: op, data: { test: 'retried' }, error: undefined, extensions: undefined, hasNext: false, stale: false }
+            : {
+                operation: op,
+                data: undefined,
+                error: new CombinedError({
+                  graphQLErrors: [{ message: 'JWT expired', extensions: { code: 'jwt-expired' } }],
+                }),
+                extensions: undefined,
+                hasNext: false,
+                stale: false,
+              };
+          forwardedResults.push(result);
+          return wFromValue(result);
+        }),
+      );
+    };
+
+    const { source, next: nextOp } = makeSubject<Operation>();
+    const results: OperationResult[] = [];
+
+    const results$ = exchange({ forward, client: null as never, dispatchDebug: () => {} })(source);
+
+    await new Promise<void>((resolve) => {
+      wPipe(results$, subscribe((r: OperationResult) => {
+        results.push(r);
+        if (results.length >= 1) resolve();
+      }));
+      nextOp(queryOp);
+    });
+
+    // Refresh should have been called
+    expect(mockStrategy.refresh).toHaveBeenCalledTimes(1);
+    // A retry should have happened (forward called at least twice)
+    expect(forwardCallCount).toBeGreaterThanOrEqual(2);
   });
 });

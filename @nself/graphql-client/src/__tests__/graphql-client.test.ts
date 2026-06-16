@@ -252,3 +252,63 @@ describe('NselfGraphqlClient onError integration', () => {
     expect(onError).not.toHaveBeenCalled(); // no operation executed yet
   });
 });
+
+// ─── statusForCode paths via combinedErrorToAppError ─────────────────────────
+
+describe('combinedErrorToAppError — additional status codes', () => {
+  it('maps "rate-limited" code to rate_limited with status 429', () => {
+    const error = makeCombinedError({
+      graphQLErrors: [{ message: 'Rate limited', extensions: { code: 'rate-limited' } }],
+    });
+    const appError = combinedErrorToAppError(error);
+    expect(appError.code).toBe('rate_limited');
+    expect(appError.status).toBe(429);
+  });
+});
+
+// ─── makeErrorExchange onResult integration ───────────────────────────────────
+
+describe('makeErrorExchange — onResult with error', () => {
+  it('calls onError when exchange processes a result with error', async () => {
+    const { pipe: wPipe, fromValue: wFromValue, subscribe: wSubscribe, makeSubject } = await import('wonka');
+    const { mapExchange: wMapExchange, makeOperation, createRequest, CombinedError } = await import('@urql/core');
+
+    const onError = vi.fn();
+    const exchange = makeErrorExchange(onError);
+
+    // Build a minimal exchange input
+    const queryOp = makeOperation(
+      'query',
+      createRequest('query Q { q }', {}),
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+    );
+
+    const gqlError = new CombinedError({
+      graphQLErrors: [{ message: 'forbidden', extensions: { code: 'access-denied' } }],
+    });
+
+    const errorResult = {
+      operation: queryOp,
+      data: undefined,
+      error: gqlError,
+      extensions: undefined,
+      hasNext: false,
+      stale: false,
+    };
+
+    const { source, next } = makeSubject<typeof errorResult>();
+
+    // forward just passes through
+    const forward = (ops$: typeof source) => ops$;
+
+    const results$ = exchange({ forward: forward as never, client: null as never, dispatchDebug: () => {} })(source as never);
+
+    await new Promise<void>((resolve) => {
+      wPipe(results$, wSubscribe(() => { resolve(); }));
+      next(errorResult);
+    });
+
+    expect(onError).toHaveBeenCalledOnce();
+    expect(onError.mock.calls[0]?.[0]).toMatchObject({ code: 'forbidden' });
+  });
+});

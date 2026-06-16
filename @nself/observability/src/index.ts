@@ -15,11 +15,13 @@
  * SPORT: F08-SERVICE-INVENTORY.md (@nself/observability)
  */
 
-import { initSentry, type SentryConfig, type SentrySdk } from './sentry.js';
-import { initOtel, type OtelConfig } from './otel.js';
+import { initSentry } from './sentry.js';
+import type { SentryConfig, SentrySdk, AppKind } from './sentry.js';
+import { initOtel } from './otel.js';
+import type { OtelConfig } from './otel.js';
 
-export type { SentryConfig, SentrySdk, AppKind } from './sentry.js';
-export type { OtelConfig } from './otel.js';
+export type { SentryConfig, SentrySdk, AppKind };
+export type { OtelConfig };
 export { scrubEvent, scrubPatterns } from './pii.js';
 
 /** Combined observability configuration. Both fields are optional. */

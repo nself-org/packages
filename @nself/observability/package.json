@@ -19,6 +19,7 @@
     "@opentelemetry/sdk-trace-base": "^1",
     "@opentelemetry/sdk-trace-node": "^1",
     "@opentelemetry/semantic-conventions": "^1",
+    "@sentry/types": "^8",
     "@vitest/coverage-v8": "^2.1.9",
     "vitest": "^2.1.9"
   },

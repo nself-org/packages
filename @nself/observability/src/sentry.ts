@@ -29,18 +29,13 @@ export type AppKind = 'web' | 'native' | 'desktop' | 'server';
 /**
  * Minimal Sentry SDK interface required by initSentry.
  * Matches the public API of @sentry/browser, @sentry/node, @sentry/react-native, etc.
+ *
+ * Note: We use minimal typing here to avoid type conflicts between platform-specific SDKs.
+ * The `init` method accepts platform-specific options, so we accept `Record<string, any>`.
  */
 export interface SentrySdk {
-  init(options: {
-    dsn: string;
-    environment: string;
-    release: string;
-    tracesSampleRate?: number;
-    ignoreErrors?: ReadonlyArray<string | RegExp>;
-    beforeSend?: (event: Record<string, unknown>) => Record<string, unknown> | null;
-    integrations?: unknown[];
-    [key: string]: unknown;
-  }): void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  init(options: Record<string, any>): void;
 }
 
 /** Configuration for Sentry initialisation. */
@@ -106,7 +101,8 @@ export function initSentry(config: SentryConfig): void {
     ignoreErrors: [...IGNORE_ERRORS],
 
     // PII scrubber always runs — strip emails, UUIDs, device tokens
-    beforeSend(event: Record<string, unknown>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    beforeSend(event: any) {
       return scrubEvent(event);
     },
   });

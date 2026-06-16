@@ -22,8 +22,16 @@ import {
   isAuthFailedError,
   isNotFoundError,
   isValidationError,
+  isForbiddenError,
+  isRateLimitedError,
+  isInternalError,
+  isLicenseRequiredError,
+  isTenantMismatchError,
+  isAppError,
+  isValidErrorCode,
   type Result,
   type AppError,
+  type AppErrorCode,
 } from '../index.js';
 
 describe('@nself/errors', () => {
@@ -195,6 +203,58 @@ describe('@nself/errors', () => {
       expect(isAuthFailedError(null)).toBe(false);
       expect(isAuthFailedError(undefined)).toBe(false);
       expect(isNotFoundError(null)).toBe(false);
+    });
+
+    it('isForbiddenError() identifies forbidden errors', () => {
+      const error: AppError = { code: 'forbidden', message: 'Forbidden', status: 403 };
+      expect(isForbiddenError(error)).toBe(true);
+      expect(isAuthFailedError(error)).toBe(false);
+    });
+
+    it('isRateLimitedError() identifies rate_limited errors', () => {
+      const error: AppError = { code: 'rate_limited', message: 'Too many requests', status: 429 };
+      expect(isRateLimitedError(error)).toBe(true);
+      expect(isForbiddenError(error)).toBe(false);
+    });
+
+    it('isInternalError() identifies internal errors', () => {
+      const error: AppError = { code: 'internal', message: 'Internal server error', status: 500 };
+      expect(isInternalError(error)).toBe(true);
+      expect(isRateLimitedError(error)).toBe(false);
+    });
+
+    it('isLicenseRequiredError() identifies license_required errors', () => {
+      const error: AppError = { code: 'license_required', message: 'License required', status: 402, requiredBundle: 'nclaw' };
+      expect(isLicenseRequiredError(error)).toBe(true);
+      expect(isInternalError(error)).toBe(false);
+    });
+
+    it('isTenantMismatchError() identifies tenant_mismatch errors', () => {
+      const error: AppError = { code: 'tenant_mismatch', message: 'Tenant mismatch', status: 403 };
+      expect(isTenantMismatchError(error)).toBe(true);
+      expect(isLicenseRequiredError(error)).toBe(false);
+    });
+
+    it('isAppError() validates full AppError shape', () => {
+      const error: AppError = { code: 'auth_failed', message: 'Unauthorized', status: 401 };
+      expect(isAppError(error)).toBe(true);
+      expect(isAppError({ code: 'auth_failed' })).toBe(false); // missing message+status
+      expect(isAppError(null)).toBe(false);
+      expect(isAppError('string')).toBe(false);
+      expect(isAppError({ code: 42, message: 'x', status: 500 })).toBe(false); // non-string code
+    });
+
+    it('isValidErrorCode() validates all AppErrorCode values', () => {
+      const validCodes: AppErrorCode[] = [
+        'auth_failed', 'not_found', 'forbidden', 'validation_error',
+        'rate_limited', 'internal', 'license_required', 'tenant_mismatch',
+      ];
+      for (const code of validCodes) {
+        expect(isValidErrorCode(code)).toBe(true);
+      }
+      expect(isValidErrorCode('unknown_code')).toBe(false);
+      expect(isValidErrorCode(null)).toBe(false);
+      expect(isValidErrorCode(42)).toBe(false);
     });
   });
 
