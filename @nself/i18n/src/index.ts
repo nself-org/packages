@@ -4,6 +4,7 @@
  * Exports:
  * - TranslationKey: Union type of all valid translation keys
  * - RTL utilities: isRTL, getTextAlign, getFlexDirection, getInsetDirection, getMarginDirection
+ * - Hijri utilities: formatHijriDate, formatLocaleDate, formatLocaleNumber
  * - React Provider: NselfI18nProvider, useNselfTranslation hook
  * - i18next: useTranslation hook from react-i18next for direct access
  */
@@ -20,6 +21,10 @@ export {
   getInsetDirection,
   getMarginDirection
 } from './rtl'
+
+// Hijri calendar + locale-aware date/number formatting
+export type { DateInput } from './hijri'
+export { formatHijriDate, formatLocaleDate, formatLocaleNumber } from './hijri'
 
 // React provider & hook
 export { NselfI18nProvider, useNselfTranslation, initializeI18next } from './provider'
