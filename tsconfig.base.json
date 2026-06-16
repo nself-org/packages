@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "composite": true,
+    "incremental": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
@@ -13,7 +16,17 @@
     "declarationMap": true,
     "sourceMap": true,
     "paths": {
+      "@nself/errors": ["./@nself/errors/src/index.ts"],
+      "@nself/sdk-core": ["./@nself/sdk-core/src/index.ts"],
+      "@nself/graphql-client": ["./@nself/graphql-client/src/index.ts"],
+      "@nself/auth-core": ["./@nself/auth-core/src/index.ts"],
       "@nself/ui": ["./@nself/ui/src/index.ts"],
+      "@nself/observability": ["./@nself/observability/src/index.ts"],
+      "@nself/astro-preset": ["./@nself/astro-preset/src/index.ts"],
+      "@nself/tauri-bridge": ["./@nself/tauri-bridge/src/index.ts"],
+      "@nself/native-bridge": ["./@nself/native-bridge/src/index.ts"],
+      "@nself/push-client": ["./@nself/push-client/src/index.ts"],
+      "@nself/i18n": ["./@nself/i18n/src/index.ts"],
       "@nself/gql": ["./@nself/gql/src/index.ts"],
       "@nself/config": ["./@nself/config/src/index.ts"],
       "@nself/types": ["./@nself/types/src/index.ts"]
