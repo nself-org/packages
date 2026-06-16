@@ -1,0 +1,33 @@
+{
+  "name": "@nself/graphql-client",
+  "version": "0.0.1",
+  "description": "urql-based GraphQL client for nSelf — factory, exchange composition, and Hasura schema codegen pipeline",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "codegen": "graphql-codegen --config codegen.yml"
+  },
+  "dependencies": {
+    "@nself/errors": "workspace:*",
+    "@nself/sdk-core": "workspace:*",
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@urql/core": "^5.0.6",
+    "graphql": "^16.9.0",
+    "wonka": "^6.3.4"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^7.1.2",
+    "@graphql-codegen/client-preset": "^6.0.1",
+    "@vitest/coverage-v8": "^2",
+    "msw": "^2.7.0",
+    "vitest": "^2.1.9"
+  }
+}

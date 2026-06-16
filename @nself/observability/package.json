@@ -1,0 +1,39 @@
+{
+  "name": "@nself/observability",
+  "version": "0.0.1",
+  "description": "Sentry DSN factory, OTel trace setup, and PII scrubber for all nSelf apps",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@opentelemetry/exporter-zipkin": "^1",
+    "@opentelemetry/resources": "^1",
+    "@opentelemetry/sdk-trace-base": "^1",
+    "@opentelemetry/sdk-trace-node": "^1",
+    "@opentelemetry/semantic-conventions": "^1",
+    "@vitest/coverage-v8": "^2.1.9",
+    "vitest": "^2.1.9"
+  },
+  "peerDependencies": {
+    "@opentelemetry/exporter-zipkin": ">=1",
+    "@opentelemetry/resources": ">=1",
+    "@opentelemetry/sdk-trace-base": ">=1",
+    "@opentelemetry/sdk-trace-node": ">=1",
+    "@opentelemetry/semantic-conventions": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/exporter-zipkin": { "optional": true },
+    "@opentelemetry/resources": { "optional": true },
+    "@opentelemetry/sdk-trace-base": { "optional": true },
+    "@opentelemetry/sdk-trace-node": { "optional": true },
+    "@opentelemetry/semantic-conventions": { "optional": true }
+  }
+}

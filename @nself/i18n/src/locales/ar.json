@@ -1,0 +1,50 @@
+{
+  "common": {
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "ok": "موافق",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "loading": "جاري التحميل",
+    "error": "خطأ",
+    "success": "نجاح",
+    "warning": "تحذير",
+    "info": "معلومة",
+    "search": "بحث",
+    "clear": "مسح",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين",
+    "more": "المزيد",
+    "less": "أقل"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "createAccount": "ليس لديك حساب؟ أنشئ واحدًا",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟ سجل الدخول",
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
+    "logoutSuccess": "تم تسجيل الخروج بنجاح"
+  },
+  "errors": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+    "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "passwordMismatch": "كلمات المرور غير متطابقة",
+    "userNotFound": "المستخدم غير موجود",
+    "invalidCredentials": "بريد إلكتروني أو كلمة مرور غير صحيحة",
+    "accountLocked": "الحساب مقفل مؤقتًا",
+    "networkError": "خطأ في الشبكة. يرجى المحاولة مرة أخرى",
+    "serverError": "خطأ في الخادم. يرجى المحاولة لاحقًا",
+    "unauthorized": "ليس لديك إذن لتنفيذ هذا الإجراء"
+  }
+}

@@ -1,0 +1,48 @@
+# nSelf Hasura GraphQL Schema Snapshot
+#
+# Generated from: api.nself.org/v1/graphql
+# Purpose: Offline dev schema — used by codegen when Hasura endpoint is unavailable.
+# Update: Run pnpm --filter @nself/graphql-client codegen:live with HASURA_GRAPHQL_ADMIN_SECRET set.
+#
+# SPORT: F13-CROSS-REPO-DEPS.md row @nself/graphql-client (schema snapshot)
+
+scalar timestamptz
+scalar uuid
+scalar jsonb
+scalar citext
+scalar bigint
+scalar numeric
+
+"""
+The root query type.
+All nSelf queries flow through Hasura's role-based permission engine.
+"""
+type query_root {
+  """
+  Health check — returns true when Hasura is running.
+  Available to all roles (anonymous included).
+  """
+  _health: Boolean
+}
+
+"""
+The root mutation type.
+All mutations require an authenticated JWT with the appropriate Hasura role.
+"""
+type mutation_root {
+  _placeholder: Boolean
+}
+
+"""
+The root subscription type.
+Real-time subscriptions require an authenticated JWT with the appropriate Hasura role.
+"""
+type subscription_root {
+  _placeholder: Boolean
+}
+
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}

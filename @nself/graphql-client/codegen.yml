@@ -1,0 +1,31 @@
+# GraphQL Code Generator — @nself/graphql-client
+#
+# Purpose: Generate fully-typed TypeScript operations from the nSelf Hasura schema.
+# Schema:  src/codegen/schema.graphql (snapshot — safe for offline dev and CI)
+#          To regenerate the snapshot from the live endpoint, run codegen:live with
+#          HASURA_GRAPHQL_ADMIN_SECRET set.
+# Run:     pnpm --filter @nself/graphql-client codegen
+#
+# Constraints:
+#   - uses local schema snapshot so codegen works without network/admin-secret.
+#   - ignoreNoDocuments: true — codegen succeeds even with zero .graphql operation files.
+#   - overwrite: true — always regenerate output cleanly.
+#   - documents glob scoped to this package only.
+#
+# SPORT: F13-CROSS-REPO-DEPS.md — codegen from api.nself.org schema
+
+schema:
+  - "src/codegen/schema.graphql"
+
+documents:
+  - "src/**/*.graphql"
+  - "!src/codegen/schema.graphql"
+
+ignoreNoDocuments: true
+overwrite: true
+
+generates:
+  src/codegen/generated/:
+    preset: client
+    presetConfig:
+      fragmentMasking: { unmaskFunctionName: "getFragmentData" }
