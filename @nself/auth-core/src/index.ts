@@ -55,3 +55,17 @@ export {
   createAuthExchangeForStrategy,
 } from './provider.js';
 export type { NselfAuthProviderProps } from './provider.js';
+
+// Flutter SDK compatibility layer (for app SDKs consuming plugins-pro/paid/auth/flutter)
+export { NSelfAuthCompat } from './flutter-compat.js';
+export type {
+  FlutterAuthUser,
+  FlutterAuthState,
+  FlutterStorageBackend,
+} from './flutter-compat.js';
+export {
+  BiometricUnavailableException,
+  BiometricFailedException,
+  SessionExpiredException,
+  UnauthorizedException,
+} from './flutter-compat.js';
