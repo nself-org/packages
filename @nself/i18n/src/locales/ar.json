@@ -46,5 +46,19 @@
     "networkError": "خطأ في الشبكة. يرجى المحاولة مرة أخرى",
     "serverError": "خطأ في الخادم. يرجى المحاولة لاحقًا",
     "unauthorized": "ليس لديك إذن لتنفيذ هذا الإجراء"
+  },
+  "asyncScreen": {
+    "loadingLabel": "جاري التحميل",
+    "emptyHeading": "لا يوجد شيء هنا بعد",
+    "emptyBody": "لا يوجد شيء لعرضه في الوقت الحالي.",
+    "errorHeading": "حدث خطأ ما",
+    "errorBody": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+    "errorRetry": "حاول مجددًا",
+    "offlineHeading": "أنت غير متصل",
+    "offlineBody": "تحقق من اتصالك وحاول مرة أخرى.",
+    "permissionDeniedHeading": "الوصول مقيّد",
+    "permissionDeniedBody": "خطتك لا تشمل الوصول إلى هذه الميزة.",
+    "rateLimitedHeading": "تم الوصول إلى حد الطلبات",
+    "rateLimitedBody": "يرجى الانتظار لحظة قبل المحاولة مجددًا."
   }
 }

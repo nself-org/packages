@@ -65,6 +65,19 @@ export type TranslationKey =
       | 'networkError'
       | 'serverError'
       | 'unauthorized'}`
+  | `asyncScreen.${
+      | 'loadingLabel'
+      | 'emptyHeading'
+      | 'emptyBody'
+      | 'errorHeading'
+      | 'errorBody'
+      | 'errorRetry'
+      | 'offlineHeading'
+      | 'offlineBody'
+      | 'permissionDeniedHeading'
+      | 'permissionDeniedBody'
+      | 'rateLimitedHeading'
+      | 'rateLimitedBody'}`
 
 /**
  * Supported locale identifiers.

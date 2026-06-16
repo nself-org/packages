@@ -46,5 +46,19 @@
     "networkError": "Network error. Please try again",
     "serverError": "Server error. Please try again later",
     "unauthorized": "You do not have permission to perform this action"
+  },
+  "asyncScreen": {
+    "loadingLabel": "Loading",
+    "emptyHeading": "Nothing here yet",
+    "emptyBody": "There is nothing to show at the moment.",
+    "errorHeading": "Something went wrong",
+    "errorBody": "An unexpected error occurred. Please try again.",
+    "errorRetry": "Try again",
+    "offlineHeading": "You are offline",
+    "offlineBody": "Check your connection and try again.",
+    "permissionDeniedHeading": "Access restricted",
+    "permissionDeniedBody": "Your plan does not include access to this feature.",
+    "rateLimitedHeading": "Rate limit reached",
+    "rateLimitedBody": "Please wait a moment before trying again."
   }
 }

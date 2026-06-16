@@ -40,14 +40,38 @@ describe('@nself/ui exports', () => {
     expect(typeof ui.Card).toBe('function');
   });
 
-  it('has exactly the expected named exports', () => {
+  it('exports all 7 state sub-components', () => {
+    expect(ui.LoadingState).toBeDefined();
+    expect(ui.EmptyState).toBeDefined();
+    expect(ui.ErrorState).toBeDefined();
+    expect(ui.OfflineState).toBeDefined();
+    expect(ui.PermissionDeniedState).toBeDefined();
+    expect(ui.RateLimitedState).toBeDefined();
+  });
+
+  it('exports useAsyncState hook', () => {
+    expect(ui.useAsyncState).toBeDefined();
+    expect(typeof ui.useAsyncState).toBe('function');
+  });
+
+  it('has at minimum all expected named exports', () => {
     const exportedKeys = Object.keys(ui).sort();
-    expect(exportedKeys).toEqual([
+    const required = [
       'AsyncScreen',
       'Button',
       'Card',
+      'EmptyState',
       'ErrorBoundary',
+      'ErrorState',
       'Input',
-    ]);
+      'LoadingState',
+      'OfflineState',
+      'PermissionDeniedState',
+      'RateLimitedState',
+      'useAsyncState',
+    ];
+    for (const key of required) {
+      expect(exportedKeys).toContain(key);
+    }
   });
 });
