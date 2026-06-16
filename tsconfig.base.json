@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "paths": {
+      "@nself/ui": ["./@nself/ui/src/index.ts"],
+      "@nself/gql": ["./@nself/gql/src/index.ts"],
+      "@nself/config": ["./@nself/config/src/index.ts"],
+      "@nself/types": ["./@nself/types/src/index.ts"]
+    }
+  },
+  "include": ["@nself/**/*.ts", "@nself/**/*.tsx"],
+  "exclude": ["node_modules", "dist", ".turbo", "**/@nself/*/dist/**", "**/node_modules/**"]
+}

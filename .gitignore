@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+.DS_Store
+.vscode/*
+.idea/
+.claude/
+.codex/
+.cursor/
+.aider/
+.aider.chat.history.md
+.continue/
+.windsurf/
+.gemini/
+.codeium/
