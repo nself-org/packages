@@ -1,0 +1,37 @@
+{
+  "name": "@nself/auth-core",
+  "version": "0.0.1",
+  "description": "nSelf dual-transport auth — httpOnly cookie (web) + Bearer+SecureStore (native), JWT refresh, urql authExchange",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@nself/errors": "workspace:*",
+    "@nself/sdk-core": "workspace:*",
+    "@urql/core": "^5.0.6",
+    "wonka": "^6.3.4"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@vitest/coverage-v8": "^2",
+    "react": "^18",
+    "vitest": "^2.1.9"
+  }
+}

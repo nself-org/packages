@@ -1,0 +1,35 @@
+{
+  "name": "@nself/tauri-bridge",
+  "version": "0.0.1",
+  "description": "Tauri 2 IPC abstraction layer — typed command invokers, window management, auto-update, and shell-open helpers for nSelf desktop apps",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nself/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-opener": "^2.0.0",
+    "@tauri-apps/plugin-updater": "^2.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "jsdom": "^26.0.0",
+    "vitest": "^2.1.9"
+  },
+  "peerDependencies": {
+    "@tauri-apps/api": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tauri-apps/api": {
+      "optional": true
+    }
+  }
+}
