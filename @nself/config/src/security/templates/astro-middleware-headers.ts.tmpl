@@ -1,0 +1,51 @@
+/**
+ * Template: Astro middleware for CSP + security headers
+ * File:     src/middleware.ts  (in the Astro app)
+ * Usage:    Copy this file to your Astro app's src/middleware.ts and fill in env vars.
+ *
+ * For static exports (astro build --mode static), CSP via <meta http-equiv> is used instead
+ * because response headers are not available. In that case use the <SEO> component pattern
+ * in your layout and skip this middleware.
+ *
+ * For SSR (output: 'server' or 'hybrid'), this middleware runs on every response.
+ */
+
+import type { MiddlewareHandler } from 'astro';
+import { buildCsp, nselfBaseHeaders } from '@nself/config/security';
+import { randomBytes } from 'node:crypto';
+
+// CONFIGURE: replace with your app's Hasura endpoint and optional Sentry DSN
+const HASURA_URL = import.meta.env.PUBLIC_HASURA_URL ?? 'https://api.nself.org/v1/graphql';
+const SENTRY_DSN = import.meta.env.PUBLIC_SENTRY_DSN ?? undefined;
+// CONFIGURE: add any CDN domains your app loads images from
+const CDN_DOMAINS: string[] = [
+  // 'https://cdn.nself.org',
+];
+
+export const onRequest: MiddlewareHandler = async (_ctx, next) => {
+  const response = await next();
+
+  // Generate a per-request nonce for inline scripts (if you use any)
+  const nonce = randomBytes(16).toString('base64');
+
+  const csp = buildCsp({
+    hasuraUrl: HASURA_URL,
+    sentryDsn: SENTRY_DSN,
+    cdnDomains: CDN_DOMAINS,
+    nonce,
+  });
+
+  // Apply CSP header
+  response.headers.set('Content-Security-Policy', csp);
+
+  // Apply baseline security headers
+  for (const { key, value } of nselfBaseHeaders) {
+    response.headers.set(key, value);
+  }
+
+  // Expose nonce to templates via response header (Astro can read this in layouts)
+  // Usage in layout: const nonce = Astro.response.headers.get('x-csp-nonce') ?? '';
+  response.headers.set('x-csp-nonce', nonce);
+
+  return response;
+};

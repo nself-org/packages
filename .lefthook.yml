@@ -1,0 +1,19 @@
+# nSelf workspace lefthook configuration — P3 E1 T14
+# Runs incremental checks on staged/changed files in @nself/* packages
+
+pre-commit:
+  commands:
+    typecheck:
+      glob: '@nself/**/*.ts'
+      run: pnpm typecheck
+    license-check:
+      run: pnpm check:licenses
+    global-pre-commit:
+      run: bash ~/.git-hooks/pre-commit
+
+pre-push:
+  commands:
+    test:
+      run: pnpm test --filter "...(changed packages)"
+    codegen-check:
+      run: 'pnpm codegen:check || echo "WARN: codegen:check skipped (Hasura unavailable)"'

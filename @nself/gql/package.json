@@ -6,6 +6,7 @@
     ".": "./src/index.ts"
   },
   "private": false,
+  "license": "MIT",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

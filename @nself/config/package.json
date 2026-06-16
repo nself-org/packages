@@ -5,5 +5,17 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "private": false
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nself/types": "workspace:*",
+    "isomorphic-dompurify": "^2.36.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
 }

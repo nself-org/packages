@@ -1,0 +1,39 @@
+{
+  "_comment": "Template: Vercel headers config for CSP + security headers (Vite SPA surfaces).",
+  "_usage": "Merge this headers array into your app's vercel.json. Replace HASURA_URL and SENTRY_DSN with actual values for your app. The CSP value here is the static form — for SSR/edge use the buildCsp() function in your serverless function instead.",
+  "_note_on_nonce": "Nonces cannot be used in static Vercel headers because they must change per-request. For nonce support, use an edge function or SSR. Without nonce, CSP relies on 'self' for script-src.",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "_comment": "Replace HASURA_URL and optionally SENTRY_DSN. Add CDN domains to img-src as needed.",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' HASURA_URL SENTRY_DSN; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "_comment": "nFamily app overrides geolocation in its own E3 migration ticket.",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "_comment": "1 year + includeSubDomains. Do NOT add preload here — submit separately via hstspreload.org only after all subdomains are HTTPS-only.",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    }
+  ]
+}
