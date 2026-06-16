@@ -5,5 +5,20 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "private": false
+  "private": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "graphql-request": "^7.0.0",
+    "@nself/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "graphql": "^16.9.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
 }

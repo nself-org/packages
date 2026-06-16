@@ -5,10 +5,15 @@
   "scripts": {
     "typecheck": "tsc --noEmit --project tsconfig.base.json",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:check": "graphql-codegen --config codegen.ts --check"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^7.1.2",
+    "@graphql-codegen/client-preset": "^6.0.1",
     "@types/node": "^22",
+    "graphql": "^16.9.0",
     "typescript": "^5"
   }
 }
