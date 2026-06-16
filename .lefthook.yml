@@ -16,4 +16,6 @@ pre-push:
     test:
       run: pnpm test --filter "...(changed packages)"
     codegen-check:
-      run: 'pnpm codegen:check || echo "WARN: codegen:check skipped (Hasura unavailable)"'
+      # Uses committed schema.graphql — no live Hasura endpoint needed. Fails if
+      # generated/ is stale (generated types do not match schema + operations).
+      run: 'pnpm codegen:check'

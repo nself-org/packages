@@ -22,6 +22,11 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "codegen": {
+      "dependsOn": ["^build"],
+      "outputs": ["src/codegen/generated/**"],
+      "cache": false
     }
   }
 }

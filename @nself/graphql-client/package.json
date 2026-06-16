@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "codegen": "graphql-codegen --config codegen.yml"
+    "codegen": "graphql-codegen --config codegen.yml",
+    "schema:pull": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@nself/errors": "workspace:*",
