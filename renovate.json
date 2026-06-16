@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "matchPackagePatterns": ["react", "react-dom", "@types/react"],
+      "groupName": "React ecosystem"
+    },
+    {
+      "matchPackagePatterns": ["vite", "@vitejs/"],
+      "groupName": "Vite ecosystem"
+    },
+    {
+      "matchPackagePatterns": ["astro", "@astrojs/"],
+      "groupName": "Astro ecosystem"
+    },
+    {
+      "matchPackagePatterns": ["expo", "react-native"],
+      "groupName": "Expo/RN ecosystem"
+    },
+    {
+      "matchPackagePatterns": ["@tauri-apps/"],
+      "groupName": "Tauri ecosystem"
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "web/**",
+    "nchat/**",
+    "nclaw/**",
+    "ntask/**",
+    "ntv/**",
+    "nfamily/**",
+    "clawde/**",
+    "admin/**"
+  ],
+  "labels": ["dependencies"]
+}
