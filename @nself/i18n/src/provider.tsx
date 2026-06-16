@@ -14,7 +14,13 @@ import i18next from 'i18next'
 import { initReactI18next, useTranslation } from 'react-i18next'
 import type { TranslationKey, Locale } from './types'
 import enMessages from './locales/en.json'
+import frMessages from './locales/fr.json'
 import arMessages from './locales/ar.json'
+import esMessages from './locales/es.json'
+import zhMessages from './locales/zh.json'
+import jaMessages from './locales/ja.json'
+import deMessages from './locales/de.json'
+import ptMessages from './locales/pt.json'
 
 /**
  * Initialize i18next with locale resources.
@@ -32,7 +38,13 @@ const initializeI18next = (locale: Locale = 'en'): void => {
     .init({
       resources: {
         en: { translation: enMessages },
-        ar: { translation: arMessages }
+        fr: { translation: frMessages },
+        ar: { translation: arMessages },
+        es: { translation: esMessages },
+        zh: { translation: zhMessages },
+        ja: { translation: jaMessages },
+        de: { translation: deMessages },
+        pt: { translation: ptMessages }
       },
       lng: locale,
       fallbackLng: 'en',

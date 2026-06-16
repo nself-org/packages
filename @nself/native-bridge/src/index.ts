@@ -54,6 +54,8 @@ export type {
   Topic,
   // JSI interface
   NcLawJSIInterface,
+  // chatSend return type
+  ChatSendResult,
 } from './nclaw-jsi.js';
 
 export {
@@ -63,3 +65,29 @@ export {
   getNcLawJSI,
   registerNcLawJSI,
 } from './nclaw-jsi.js';
+
+// NclawModule — full libnclaw FFI JSI bridge via react-native-nitro-modules.
+// Covers all FFI audit §5 groups (A: crypto, B: dampers, C: core, D: db/llm/vault/sync).
+// Primary entry point for nclaw/mobile:
+//   import { NativeNclaw } from '@nself/native-bridge';
+//   await NativeNclaw.chatSend('hello');
+export type {
+  NativeDeviceKeypair,
+  NativeSessionCipher,
+  NclawCryptoModule,
+  NclawDampersModule,
+  NclawCoreModule,
+  NclawDbModule,
+  NclawLlmModule,
+  NclawVaultModule,
+  NclawSyncModule,
+  NclawModule,
+} from './NclawModule.nitro.js';
+
+export {
+  NclawModuleNotImplementedError,
+  NclawModuleStub,
+  getNativeNclaw,
+  registerNativeNclaw,
+  NativeNclaw,
+} from './NclawModule.nitro.js';

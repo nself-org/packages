@@ -15,6 +15,7 @@ Provides typed TypeScript interfaces for SecureStore, push notifications, biomet
 | Biometrics | `biometrics.ts` | `expo-local-authentication` — Face ID / fingerprint |
 | NclawFFI (legacy) | `nclaw-ffi.ts` | Opaque Rust FFI blob seam (pre-JSI placeholder) |
 | **NcLawJSI** | **`nclaw-jsi.ts`** | **Full libnclaw Rust→RN JSI seam (react-native-nitro-modules target)** |
+| **NclawModule** | **`NclawModule.nitro.ts`** | **libnclaw C-ABI JSI bridge: all FFI audit §5 groups (A–D). Primary entry point via `NativeNclaw`.** |
 
 ---
 
@@ -126,7 +127,69 @@ import {
 
 ---
 
+## NclawModule — libnclaw C-ABI JSI Bridge
+
+Implemented in T-P3-E4-W2-S3-T03. Exposes all FFI symbols from `nclaw/core` (FFI audit `T-P3-E4-W1-S1-T02 §5`) as typed JSI calls via `react-native-nitro-modules`.
+
+### Quick start
+
+```typescript
+import { NativeNclaw, registerNativeNclaw } from '@nself/native-bridge';
+
+// Stub by default — throws NclawModuleNotImplementedError until native module registered.
+// After nclaw/mobile T04 bootstrap:
+registerNativeNclaw(nativeModuleInstance);
+
+// Acceptance test: resolves without native crash
+const response = await NativeNclaw.chatSend('hello');
+const memories = await NativeNclaw.memorySearch('query', 10);
+```
+
+### FFI Groups
+
+| Group | TypeScript interface | Source | Status |
+|-------|---------------------|--------|--------|
+| A — Crypto | `NclawCryptoModule` | `lib.rs` symbols 2–9 | Implemented |
+| B — Dampers | `NclawDampersModule` | `mobile_ffi.rs` symbols 11–13 | Implemented |
+| C — Core (frb) | `NclawCoreModule` | `api.rs` symbols 14–16 | Implemented |
+| D — DB | `NclawDbModule` | Planned symbols D1–D5 | Spec only |
+| D — LLM | `NclawLlmModule` | Planned symbols D6–D10 | Spec only (streaming via events) |
+| D — Vault | `NclawVaultModule` | Planned symbols D11–D15 | Spec only |
+| D — Sync | `NclawSyncModule` | Planned symbols D16–D19 | Spec only |
+
+### Build (Rust cross-compilation)
+
+```bash
+# From packages/native-bridge/
+./scripts/build.sh              # iOS + Android (release)
+./scripts/build.sh --ios-only   # iOS fat lib (device + sim)
+./scripts/build.sh --android-only  # Android arm64 + x86_64
+```
+
+Prerequisites: `rustup`, `cargo-ndk`, `cbindgen`, Android NDK, Xcode.
+
+Outputs: `ios/libs/libnclaw.a`, `ios/libs/nclaw.h`, `android/libs/{arm64-v8a,x86_64}/libnclaw.a`.
+
+### Native implementations
+
+- **iOS**: `ios/NclawModule.mm` + `ios/NclawModule.h` (Obj-C++, serial dispatch queue)
+- **Android**: `android/src/main/cpp/nclaw-jni.cpp` (JNI, Dispatchers.IO) + `android/src/main/kotlin/com/nself/nativebridge/NclawModule.kt`
+- **CMakeLists.txt**: `android/CMakeLists.txt` links `libnclaw.a` into `libnclaw-bridge.so`
+- **Podspec**: `ios/NclawModule.podspec` links `libnclaw.a` via `vendored_libraries`
+
+### Thread safety
+
+All blocking FFI calls run on a dedicated background thread (iOS: serial `DispatchQueue`; Android: `Dispatchers.IO`). `libnclaw_last_error()` is captured on the same thread as the failing call (RF-01 from FFI audit). JS thread is never blocked.
+
+### Memory management
+
+- `*const c_char` returns (`libnclaw_version`, `libnclaw_last_error`): static/thread-local — copy to string, DO NOT free.
+- `*mut c_char` returns (encrypt, decrypt, public_b64): caller-owned — `libnclaw_free_string()` called immediately after copy.
+- Opaque handles (`FfiDeviceKeypair*`, `FfiSessionCipher*`): wrapped in `NativeState`; destructor calls `libnclaw_*_free`.
+
+---
+
 ## SPORT
 
 - `F13-CROSS-REPO-DEPS.md`: `nclaw/core types.rs → @nself/native-bridge NcLawJSI`
-- `F08-SERVICE-INVENTORY.md`: `@nself/native-bridge` package entry
+- `F08-SERVICE-INVENTORY.md`: `@nself/native-bridge` package entry; libnclaw JSI bridge added (T-P3-E4-W2-S3-T03)

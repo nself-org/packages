@@ -254,6 +254,63 @@ export interface NcLawJSIInterface {
    * @returns      list of matching Memory objects, ordered by relevance
    */
   searchMemory(query: string, limit: number): Promise<Memory[]>;
+
+  /**
+   * Transcribe audio to text using the on-device libnclaw Whisper integration.
+   *
+   * Audio must be WAV/PCM format (16-bit, 16 kHz, mono) as a raw byte array.
+   * expo-av Audio.Recording produces m4a by default — callers must configure
+   * AndroidOutputFormat.DEFAULT / IOSOutputFormat.LINEARPCM or transcode before
+   * calling this method. See nclaw/mobile/hooks/useVoiceInput.ts for correct
+   * expo-av Recording options.
+   *
+   * @param audioData  — WAV/PCM audio bytes from expo-av
+   * @returns          transcribed text string; throws TranscriptionError on failure
+   */
+  transcribe(audioData: Uint8Array): Promise<string>;
+
+  /**
+   * Send a user message through the libnclaw inference pipeline.
+   *
+   * This is the primary entry point for all AI chat interactions from nclaw/mobile.
+   * The call dispatches to the Rust libnclaw inference layer on a background thread.
+   * Streaming response tokens arrive via the GraphQL chat_message_stream subscription
+   * (see nclaw/mobile/services/chat.ts) — this method resolves when inference starts
+   * and the conversationId is established, NOT when streaming completes.
+   *
+   * @param message         — the user's message text
+   * @param conversationId  — ID of the conversation to continue; null to start a new one
+   * @param memoryContext   — optional pre-formatted memory context from useMemoryRecall
+   * @returns               ChatSendResult with the conversation and message IDs for
+   *                        correlating the GraphQL stream subscription
+   * @throws                When the inference pipeline cannot start (network, rate limit,
+   *                        or model error). The error message is propagated from Rust.
+   */
+  chatSend(
+    message: string,
+    conversationId: string | null,
+    memoryContext: string | null,
+  ): Promise<ChatSendResult>;
+}
+
+// =============================================================================
+// chatSend return type
+// =============================================================================
+
+/**
+ * Result returned by NcLawJSIInterface.chatSend().
+ *
+ * Provides the IDs needed to subscribe to the GraphQL chat_message_stream
+ * for this inference run. The conversationId is returned even for new
+ * conversations so the UI can begin streaming before the persist is confirmed.
+ */
+export interface ChatSendResult {
+  /** The conversation this message belongs to (new or existing). */
+  conversationId: string;
+  /** Server-assigned ID for the user message turn. */
+  messageId: string;
+  /** ISO-8601 timestamp of when inference started. */
+  startedAt: string;
 }
 
 // =============================================================================
@@ -311,6 +368,18 @@ export class NcLawJSIStub implements NcLawJSIInterface {
 
   async searchMemory(_query: string, _limit: number): Promise<Memory[]> {
     throw new NotImplementedError('searchMemory');
+  }
+
+  async transcribe(_audioData: Uint8Array): Promise<string> {
+    throw new NotImplementedError('transcribe');
+  }
+
+  async chatSend(
+    _message: string,
+    _conversationId: string | null,
+    _memoryContext: string | null,
+  ): Promise<ChatSendResult> {
+    throw new NotImplementedError('chatSend');
   }
 }
 
