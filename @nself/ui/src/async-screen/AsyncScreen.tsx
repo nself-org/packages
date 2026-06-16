@@ -34,7 +34,7 @@ import {
 
 // ─── Slot types ────────────────────────────────────────────────────────────────
 
-export interface AsyncScreenSlots<T> {
+export interface AsyncScreenSlots {
   /** Custom loading UI. */
   loading?: React.ReactNode;
   /** Custom empty-state UI. */
@@ -74,7 +74,7 @@ export interface AsyncScreenProps<T> {
    */
   onError?: (error: AppError) => void;
   /** Slot overrides — replace any default state UI. */
-  slots?: AsyncScreenSlots<T>;
+  slots?: AsyncScreenSlots;
   /** Class applied to the state container element (loading/empty/error/etc). */
   stateClassName?: string | undefined;
 }
