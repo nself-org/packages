@@ -83,6 +83,22 @@ function makeAuthFailedError(message: string): AppError {
   };
 }
 
+/**
+ * defaultMeBaseUrl — resolve the same-origin base for the /api/auth/me route.
+ *
+ * /api/auth/me is served by the app's own server (it reads the httpOnly cookie),
+ * so it must hit the current origin — NOT the nHost authBaseUrl. Returns the
+ * window origin in the browser, or '' (relative) when no origin is available
+ * (SSR / tests), in which case fetch resolves the path against its own base.
+ */
+function defaultMeBaseUrl(): string {
+  if (typeof globalThis !== 'undefined') {
+    const loc = (globalThis as { location?: { origin?: string } }).location;
+    if (loc && typeof loc.origin === 'string') return loc.origin;
+  }
+  return '';
+}
+
 // ─── WebAuthStrategy ──────────────────────────────────────────────────────────
 
 /**
@@ -93,12 +109,17 @@ function makeAuthFailedError(message: string): AppError {
  */
 export class WebAuthStrategy implements AuthStrategy {
   private readonly authBaseUrl: string;
+  private readonly meBaseUrl: string;
   private readonly fetchFn: typeof fetch;
   private currentState: AuthState = { status: 'loading' };
   private listeners: Set<(state: AuthState) => void> = new Set();
 
   constructor(config: AuthConfig = {}, fetchFn: typeof fetch = globalThis.fetch) {
     this.authBaseUrl = config.authBaseUrl ?? DEFAULT_AUTH_BASE_URL;
+    // /api/auth/me is a SAME-ORIGIN app-server route, NOT part of the nHost auth
+    // service — it must never be prefixed with authBaseUrl. Default to the page
+    // origin; fall back to a relative path when no window origin is available.
+    this.meBaseUrl = config.meBaseUrl ?? defaultMeBaseUrl();
     this.fetchFn = fetchFn;
   }
 
@@ -221,7 +242,7 @@ export class WebAuthStrategy implements AuthStrategy {
   private async checkSession(): Promise<AuthState> {
     let response: Response;
     try {
-      response = await this.fetchFn(`${this.authBaseUrl}${ME_PATH}`, {
+      response = await this.fetchFn(`${this.meBaseUrl}${ME_PATH}`, {
         method: 'GET',
         credentials: 'include',
       });

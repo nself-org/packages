@@ -1,8 +1,16 @@
-# nSelf Hasura GraphQL Schema Snapshot
+# nSelf Hasura GraphQL Schema Snapshot — PLACEHOLDER (NOT the real schema)
 #
-# Generated from: api.nself.org/v1/graphql
-# Purpose: Offline dev schema — used by codegen when Hasura endpoint is unavailable.
-# Update: Run pnpm --filter @nself/graphql-client codegen:live with HASURA_GRAPHQL_ADMIN_SECRET set.
+# WARNING: This is a hand-written skeleton, NOT generated from a live Hasura
+#          endpoint. It contains only scalars + health/placeholder root fields.
+#          It produces an effectively empty typed-operation surface; consuming
+#          apps get NO real compile-time GraphQL safety until it is replaced.
+#
+# Purpose: Lets codegen run offline/in CI without network or an admin secret.
+# Replace: Run `pnpm --filter @nself/graphql-client codegen:live` with
+#          HASURA_GRAPHQL_ADMIN_SECRET set against the real Hasura endpoint,
+#          then commit the resulting SDL. The schema:check script
+#          (scripts/check-schema.mjs) fails CI while this placeholder is in place
+#          so a build cannot ship pretending the typed contract is real.
 #
 # SPORT: F13-CROSS-REPO-DEPS.md row @nself/graphql-client (schema snapshot)
 

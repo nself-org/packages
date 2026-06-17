@@ -3,19 +3,21 @@
  *
  * Purpose: Provide helpers for directional layout support across RTL locales.
  * These utilities simplify conditional styling and layout adjustments for
- * right-to-left languages (Arabic, Hebrew, Farsi, Urdu).
+ * right-to-left languages.
  *
  * Inputs: locale string
  * Outputs: boolean, text alignment ('left'|'right'), flex direction ('row'|'row-reverse')
  * Constraints: locale must match a known locale identifier
+ *
+ * SINGLE SOURCE OF TRUTH: the set of RTL locales lives in types.ts (RTL_LOCALES).
+ * This module derives from it so isRTL here and the isRTL exported from types.ts
+ * never diverge — among the supported Locales only 'ar' is RTL.
  */
 
-/**
- * RTL locales supported by nSelf.
- * Supports: ar (Arabic), he (Hebrew), fa (Farsi), ur (Urdu)
- * Deferred in v1.0.9; scheduled for P95+ with RTL migration.
- */
-const RTL_LOCALES_SET = new Set(['ar', 'he', 'fa', 'ur'])
+import { RTL_LOCALES } from './types'
+
+/** RTL locale lookup set, derived from the canonical RTL_LOCALES list. */
+const RTL_LOCALES_SET: ReadonlySet<string> = new Set<string>(RTL_LOCALES)
 
 /**
  * Check if a locale uses right-to-left text direction.

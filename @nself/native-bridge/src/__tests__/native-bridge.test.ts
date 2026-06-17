@@ -22,38 +22,29 @@ import { isOk, isErr } from '@nself/errors';
 class MockSecureStore implements SecureStoreInterface {
   private readonly _store = new Map<string, string>();
 
-  async getItem(key: string) {
-    const value = this._store.get(key) ?? null;
-    const { ok } = await import('@nself/errors');
-    return ok(value);
+  async get(key: string): Promise<string | null> {
+    return this._store.get(key) ?? null;
   }
 
-  async setItem(key: string, value: string) {
+  async set(key: string, value: string): Promise<void> {
     this._store.set(key, value);
-    const { ok } = await import('@nself/errors');
-    return ok(undefined as void);
   }
 
-  async deleteItem(key: string) {
+  async delete(key: string): Promise<void> {
     this._store.delete(key);
-    const { ok } = await import('@nself/errors');
-    return ok(undefined as void);
   }
 }
 
-// Mock SecureStore that throws on every call (tests error wrapping)
+// Mock SecureStore that throws on every call (tests error propagation)
 class ThrowingSecureStore implements SecureStoreInterface {
-  async getItem(_key: string) {
-    const { err } = await import('@nself/errors');
-    return err({ code: 'internal' as const, message: 'SecureStore unavailable', status: 500 });
+  async get(_key: string): Promise<string | null> {
+    throw new Error('SecureStore unavailable');
   }
-  async setItem(_key: string, _value: string) {
-    const { err } = await import('@nself/errors');
-    return err({ code: 'internal' as const, message: 'SecureStore unavailable', status: 500 });
+  async set(_key: string, _value: string): Promise<void> {
+    throw new Error('SecureStore unavailable');
   }
-  async deleteItem(_key: string) {
-    const { err } = await import('@nself/errors');
-    return err({ code: 'internal' as const, message: 'SecureStore unavailable', status: 500 });
+  async delete(_key: string): Promise<void> {
+    throw new Error('SecureStore unavailable');
   }
 }
 
@@ -104,42 +95,27 @@ describe('@nself/native-bridge — SecureStoreInterface', () => {
     store = new MockSecureStore();
   });
 
-  it('setItem then getItem returns the stored value (round-trip)', async () => {
-    const setResult = await store.setItem('auth_token', 'mock-jwt-abc123');
-    expect(isOk(setResult)).toBe(true); // assertion 1
-
-    const getResult = await store.getItem('auth_token');
-    expect(isOk(getResult)).toBe(true); // assertion 2
-    if (isOk(getResult)) {
-      expect(getResult.value).toBe('mock-jwt-abc123'); // assertion 3
-    }
+  it('set then get returns the stored value (round-trip)', async () => {
+    await store.set('auth_token', 'mock-jwt-abc123'); // assertion 1
+    const value = await store.get('auth_token');
+    expect(value).toBe('mock-jwt-abc123'); // assertion 2
   });
 
-  it('getItem returns null for a missing key', async () => {
-    const result = await store.getItem('nonexistent_key');
-    expect(isOk(result)).toBe(true); // assertion 4
-    if (isOk(result)) {
-      expect(result.value).toBeNull(); // assertion 5
-    }
+  it('get returns null for a missing key', async () => {
+    const value = await store.get('nonexistent_key');
+    expect(value).toBeNull(); // assertion 3
   });
 
-  it('deleteItem removes the stored value', async () => {
-    await store.setItem('refresh_token', 'refresh-xyz');
-    await store.deleteItem('refresh_token');
-    const result = await store.getItem('refresh_token');
-    expect(isOk(result)).toBe(true); // assertion 6
-    if (isOk(result)) {
-      expect(result.value).toBeNull(); // assertion 7
-    }
+  it('delete removes the stored value', async () => {
+    await store.set('refresh_token', 'refresh-xyz');
+    await store.delete('refresh_token');
+    const value = await store.get('refresh_token');
+    expect(value).toBeNull(); // assertion 4
   });
 
-  it('ThrowingSecureStore returns Err with internal code', async () => {
+  it('ThrowingSecureStore propagates the error to the caller', async () => {
     const throwing = new ThrowingSecureStore();
-    const result = await throwing.getItem('any_key');
-    expect(isErr(result)).toBe(true); // assertion 8
-    if (isErr(result)) {
-      expect(result.error.code).toBe('internal'); // assertion 9
-    }
+    await expect(throwing.get('any_key')).rejects.toThrow('SecureStore unavailable'); // assertion 5
   });
 });
 

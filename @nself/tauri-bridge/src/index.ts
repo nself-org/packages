@@ -26,3 +26,8 @@ export type { UpdateManifest } from './update.js';
 
 // Shell / system browser
 export { openUrl } from './shell.js';
+
+// SecureStore — OS-keychain-backed, canonical get/set/delete contract
+// (matches @nself/auth-core SecureStoreInterface and @nself/native-bridge).
+export type { SecureStoreInterface } from './secure-store.js';
+export { TauriSecureStore, SecureStoreError } from './secure-store.js';

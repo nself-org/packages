@@ -21,7 +21,7 @@ import {
   type Operation,
   type OperationResult,
 } from '@urql/core';
-import { pipe, mergeMap, filter, fromPromise, fromValue, map } from 'wonka';
+import { pipe, mergeMap, filter, fromPromise, fromValue, merge, makeSubject, share } from 'wonka';
 import type { AuthStrategy } from './types.js';
 
 // ─── Hasura error codes that indicate JWT expiry or invalidity ────────────────
@@ -110,11 +110,18 @@ export function createAuthExchange(strategy: AuthStrategy): Exchange {
   return ({ forward }) => {
     return (operations$) => {
       // Track whether we're currently refreshing to avoid concurrent refresh races.
+      // refreshPromise resolves to whether refresh produced a usable (authenticated)
+      // session — a replay is only re-dispatched when it did.
       let isRefreshing = false;
-      let refreshPromise: Promise<void> | null = null;
+      let refreshPromise: Promise<boolean> | null = null;
+
+      // Retried operations are fed back into the SINGLE forward stream below
+      // (urql requires forward() be called exactly once per exchange — re-calling
+      // it would open a second downstream subscription and silently drop replays).
+      const retries = makeSubject<Operation>();
 
       const withAuth = pipe(
-        operations$,
+        merge([operations$, retries.source]),
         mergeMap((operation: Operation) => {
           // If a refresh is in progress, wait for it before sending the operation.
           if (isRefreshing && refreshPromise) {
@@ -130,7 +137,7 @@ export function createAuthExchange(strategy: AuthStrategy): Exchange {
         }),
       );
 
-      const results$ = forward(withAuth);
+      const results$ = pipe(forward(withAuth), share);
 
       return pipe(
         results$,
@@ -139,23 +146,39 @@ export function createAuthExchange(strategy: AuthStrategy): Exchange {
             return fromValue(result);
           }
 
-          // Auth error detected — refresh once, then replay the operation.
+          // Auth error detected — refresh once, then replay only if it worked.
           if (!isRefreshing) {
             isRefreshing = true;
-            refreshPromise = strategy.refresh().then(() => {
-              isRefreshing = false;
-              refreshPromise = null;
-            });
+            refreshPromise = strategy
+              .refresh()
+              .then((state) => state.status === 'authenticated')
+              .catch(() => false)
+              .finally(() => {
+                isRefreshing = false;
+                refreshPromise = null;
+              });
           }
 
           return pipe(
-            fromPromise(
-              (refreshPromise ?? Promise.resolve()).then(() => {
-                const token = strategy.getAccessToken();
-                return addTokenToOperation(result.operation, token);
-              }),
-            ),
-            mergeMap((retryOp: Operation) => forward(fromValue(retryOp))),
+            fromPromise(refreshPromise ?? Promise.resolve(false)),
+            // If refresh did not yield an authenticated session, do NOT replay —
+            // surface the original auth error so the caller sees it (prevents the
+            // 401 -> refresh -> identical 401 amplification loop, esp. on web
+            // where getAccessToken() is always null and refresh only re-reads /me).
+            mergeMap((refreshed: boolean) => {
+              if (!refreshed) {
+                return fromValue(result);
+              }
+              // Re-dispatch the original operation through the single forward
+              // stream (it picks up the freshly-refreshed token via withAuth).
+              retries.next(result.operation);
+              // Swallow the auth-error result — the replayed operation's result
+              // will be emitted by results$ instead.
+              return pipe(
+                fromValue(result),
+                filter(() => false),
+              );
+            }),
           );
         }),
       );

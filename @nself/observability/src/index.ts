@@ -18,11 +18,15 @@
 import { initSentry } from './sentry.js';
 import type { SentryConfig, SentrySdk, AppKind } from './sentry.js';
 import { initOtel } from './otel.js';
-import type { OtelConfig } from './otel.js';
+import type { OtelConfig, OtelAppKind } from './otel.js';
 
 export type { SentryConfig, SentrySdk, AppKind };
-export type { OtelConfig };
-export { scrubEvent, scrubPatterns } from './pii.js';
+export type { OtelConfig, OtelAppKind };
+export { scrubEvent, scrubFields, scrubPatterns } from './pii.js';
+
+// Canonical structured (JSON) logger — leveled, PII-scrubbed, dependency-free.
+export { createLogger } from './logger.js';
+export type { Logger, LoggerConfig, LogLevel, LogRecord, LogSink } from './logger.js';
 
 /** Combined observability configuration. Both fields are optional. */
 export interface ObservabilityConfig {

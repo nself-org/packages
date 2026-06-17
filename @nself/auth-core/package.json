@@ -29,6 +29,7 @@
     }
   },
   "devDependencies": {
+    "@nself/graphql-client": "workspace:*",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18",

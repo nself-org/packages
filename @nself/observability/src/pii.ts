@@ -93,3 +93,17 @@ function scrubValue(value: unknown, depth: number): unknown {
 export function scrubEvent(event: Record<string, unknown>): Record<string, unknown> {
   return scrubValue(event, 0) as Record<string, unknown>;
 }
+
+/**
+ * scrubFields — deep-scrub PII from an arbitrary structured-log field bag.
+ *
+ * Same recursive scrubber used for Sentry events, exposed for the structured
+ * logger so log fields (which may carry user emails/ids/device tokens) get the
+ * same redaction before they hit stdout.
+ *
+ * @param fields - Arbitrary key/value bag attached to a log line.
+ * @returns A new object with PII removed from all string leaves.
+ */
+export function scrubFields(fields: Record<string, unknown>): Record<string, unknown> {
+  return scrubValue(fields, 0) as Record<string, unknown>;
+}

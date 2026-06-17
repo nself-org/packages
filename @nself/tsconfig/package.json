@@ -1,0 +1,17 @@
+{
+  "name": "@nself/tsconfig",
+  "version": "0.0.1",
+  "description": "Canonical strict TypeScript base configs for all nSelf surfaces — extend instead of copy-pasting compilerOptions",
+  "private": false,
+  "license": "MIT",
+  "files": [
+    "base.json",
+    "react.json",
+    "node.json"
+  ],
+  "exports": {
+    "./base": "./base.json",
+    "./react": "./react.json",
+    "./node": "./node.json"
+  }
+}

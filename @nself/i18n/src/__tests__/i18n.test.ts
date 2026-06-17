@@ -13,37 +13,36 @@ import enMessages from '../locales/en.json'
 import arMessages from '../locales/ar.json'
 import { isRTL, getTextAlign, getFlexDirection } from '../types'
 
+// Locale files use a FLAT dotted-key structure (e.g. "about.version"),
+// not nested namespaces — assertions read top-level keys directly.
+const en = enMessages as Record<string, string>
+const ar = arMessages as Record<string, string>
+
 describe('i18n Locales', () => {
   it('should have en.json with at least 40 keys', () => {
-    const keys = Object.keys(enMessages).reduce((acc, ns) => {
-      return acc + Object.keys(enMessages[ns as keyof typeof enMessages]).length
-    }, 0)
-    expect(keys).toBeGreaterThanOrEqual(40)
+    expect(Object.keys(en).length).toBeGreaterThanOrEqual(40)
   })
 
   it('should have ar.json with at least 40 keys', () => {
-    const keys = Object.keys(arMessages).reduce((acc, ns) => {
-      return acc + Object.keys(arMessages[ns as keyof typeof arMessages]).length
-    }, 0)
-    expect(keys).toBeGreaterThanOrEqual(40)
+    expect(Object.keys(ar).length).toBeGreaterThanOrEqual(40)
   })
 
   it('should have matching key structure between en and ar', () => {
-    const enKeys = Object.keys(enMessages).sort()
-    const arKeys = Object.keys(arMessages).sort()
+    const enKeys = Object.keys(en).sort()
+    const arKeys = Object.keys(ar).sort()
     expect(enKeys).toEqual(arKeys)
   })
 
   it('should return correct strings for en locale', () => {
-    expect(enMessages.common.submit).toBe('Submit')
-    expect(enMessages.auth.login).toBe('Sign In')
-    expect(enMessages.errors.required).toBe('This field is required')
+    expect(en['save']).toBe('Save')
+    expect(en['cancel']).toBe('Cancel')
+    expect(en['about.version']).toBe('Version')
   })
 
   it('should return correct strings for ar locale', () => {
-    expect(arMessages.common.submit).toBe('إرسال')
-    expect(arMessages.auth.login).toBe('تسجيل الدخول')
-    expect(arMessages.errors.required).toBe('هذا الحقل مطلوب')
+    expect(ar['save']).toBe('حفظ')
+    expect(ar['cancel']).toBe('إلغاء')
+    expect(ar['about.version']).toBe('الإصدار')
   })
 })
 

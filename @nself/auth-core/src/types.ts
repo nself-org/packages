@@ -62,15 +62,19 @@ export interface TokenPair {
 /**
  * SecureStoreInterface — platform-agnostic secure key-value storage.
  *
- * Implemented by native-bridge (Expo SecureStore) and tauri-bridge (keytar).
+ * Canonical contract — both shipped implementations match it exactly:
+ *   - @nself/native-bridge ExpoSecureStore (React Native, expo-secure-store)
+ *   - @nself/tauri-bridge TauriSecureStore (desktop, OS keychain via Tauri IPC)
+ * Both throw (SecureStoreError) on a backend failure rather than returning a
+ * Result — NativeAuthStrategy relies on that throw-on-error contract.
  * Web strategy never calls this — cookie-backed auth does not use JS storage.
  */
 export interface SecureStoreInterface {
-  /** Retrieve a value by key. Returns null if not found. */
+  /** Retrieve a value by key. Returns null if not found. Throws on backend error. */
   get(key: string): Promise<string | null>;
-  /** Store a value under key. */
+  /** Store a value under key. Throws on backend error. */
   set(key: string, value: string): Promise<void>;
-  /** Delete a key. No-op if not found. */
+  /** Delete a key. No-op if not found. Throws on backend error. */
   delete(key: string): Promise<void>;
 }
 
@@ -113,6 +117,15 @@ export interface AuthConfig {
    * Defaults to 'https://api.nself.org/v1/auth'.
    */
   readonly authBaseUrl?: string;
+  /**
+   * Base URL for the app's own /api/auth/me session route (web strategy only).
+   * This is a SAME-ORIGIN app-server route that reads the httpOnly session
+   * cookie — it is NOT part of the nHost auth service, so it must never be
+   * prefixed with authBaseUrl.
+   * Defaults to the current page origin (window.location.origin) in the browser,
+   * or '' (relative path) when no origin is available.
+   */
+  readonly meBaseUrl?: string;
   /**
    * Milliseconds before token expiry to trigger a proactive refresh.
    * Default: 60_000 (60 seconds).

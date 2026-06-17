@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "_comment": "@nself/tsconfig/base — canonical strict base. EVERY nSelf repo's tsconfig.json MUST `extends: @nself/tsconfig/base` rather than hand-rolling compilerOptions. Mirrors packages/tsconfig.base.json so the strict guarantee (strict + noUncheckedIndexedAccess + noImplicitReturns + exactOptionalPropertyTypes) is enforced in one place. Drift from these flags is a build error.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

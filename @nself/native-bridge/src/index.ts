@@ -17,9 +17,10 @@
  * SPORT: F13-CROSS-REPO-DEPS.md row @nself/native-bridge
  */
 
-// SecureStore — encrypted on-device key-value storage for auth tokens
+// SecureStore — encrypted on-device key-value storage for auth tokens.
+// Canonical get/set/delete contract — matches @nself/auth-core SecureStoreInterface.
 export type { SecureStoreInterface } from './secure-store.js';
-export { ExpoSecureStore } from './secure-store.js';
+export { ExpoSecureStore, SecureStoreError } from './secure-store.js';
 
 // Push notifications — permission request + Expo push token retrieval
 export type { PushTokenProvider } from './push.js';

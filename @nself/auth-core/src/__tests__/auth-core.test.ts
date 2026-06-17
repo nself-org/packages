@@ -974,9 +974,22 @@ describe('createAuthExchange — wonka integration', () => {
     const { pipe: wPipe, makeSubject, subscribe, fromValue: wFromValue, mergeMap: wMergeMap } = await import('wonka');
     const { CombinedError } = await import('@urql/core');
 
+    const refreshedUser = {
+      id: 'u1',
+      email: 'u@example.com',
+      displayName: '',
+      roles: ['user'],
+      defaultRole: 'user',
+    };
     const mockStrategy = {
       getAccessToken: vi.fn(() => 'token'),
-      refresh: vi.fn(async () => {}),
+      // A successful refresh yields an authenticated state — only then does the
+      // exchange replay the original operation.
+      refresh: vi.fn(async () => ({
+        status: 'authenticated' as const,
+        user: refreshedUser,
+        jwt: 'token',
+      })),
       init: vi.fn(async () => ({ status: 'unauthenticated' as const })),
       login: vi.fn(async () => ({ status: 'unauthenticated' as const })),
       logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
@@ -1036,5 +1049,68 @@ describe('createAuthExchange — wonka integration', () => {
     expect(mockStrategy.refresh).toHaveBeenCalledTimes(1);
     // A retry should have happened (forward called at least twice)
     expect(forwardCallCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does NOT replay when refresh fails to authenticate (no amplification loop)', async () => {
+    const { pipe: wPipe, makeSubject, subscribe, fromValue: wFromValue, mergeMap: wMergeMap } = await import('wonka');
+    const { CombinedError } = await import('@urql/core');
+
+    // Web-like strategy: getAccessToken always null, refresh only re-checks /me
+    // and stays unauthenticated when the session is genuinely expired.
+    const mockStrategy = {
+      getAccessToken: vi.fn(() => null),
+      refresh: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      init: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      login: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
+      subscribe: vi.fn(() => () => {}),
+    };
+
+    const exchange = createAuthExchange(mockStrategy);
+
+    const queryOp = makeOperation(
+      'query',
+      createRequest('query TestQuery { test }', {}),
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+    );
+
+    let forwardCallCount = 0;
+    const forward = (ops$: Parameters<ReturnType<typeof exchange>>[0]) => {
+      return wPipe(
+        ops$,
+        wMergeMap((op: Operation) => {
+          forwardCallCount++;
+          const result: OperationResult = {
+            operation: op,
+            data: undefined,
+            error: new CombinedError({
+              graphQLErrors: [{ message: 'JWT expired', extensions: { code: 'jwt-expired' } }],
+            }),
+            extensions: undefined,
+            hasNext: false,
+            stale: false,
+          };
+          return wFromValue(result);
+        }),
+      );
+    };
+
+    const { source, next: nextOp } = makeSubject<Operation>();
+    const results: OperationResult[] = [];
+    const results$ = exchange({ forward, client: null as never, dispatchDebug: () => {} })(source);
+
+    await new Promise<void>((resolve) => {
+      wPipe(results$, subscribe((r: OperationResult) => {
+        results.push(r);
+        if (results.length >= 1) resolve();
+      }));
+      nextOp(queryOp);
+    });
+
+    // Refresh attempted once, but the failed refresh must NOT trigger a replay.
+    expect(mockStrategy.refresh).toHaveBeenCalledTimes(1);
+    expect(forwardCallCount).toBe(1);
+    // The original auth error is surfaced to the caller.
+    expect(results[0].error).toBeDefined();
   });
 });

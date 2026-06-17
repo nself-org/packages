@@ -19,6 +19,7 @@ import { invoke } from '../ipc.js';
 import { WindowManager } from '../window.js';
 import { AutoUpdater, type UpdateManifest } from '../update.js';
 import { openUrl } from '../shell.js';
+import { TauriSecureStore, SecureStoreError } from '../secure-store.js';
 import type { Result } from '@nself/errors';
 
 // ─── Environment: ensure window.__TAURI__ is absent (jsdom default) ────────
@@ -212,6 +213,32 @@ describe('openUrl()', () => {
     if (isErr(result)) {
       expect(result.error.code).toBe('internal');
       expect(result.error.message).toContain('not-tauri');
+    }
+  });
+});
+
+describe('@nself/tauri-bridge — TauriSecureStore (canonical get/set/delete)', () => {
+  const store = new TauriSecureStore();
+
+  it('get throws SecureStoreError in stub mode (no Tauri runtime)', async () => {
+    await expect(store.get('auth_token')).rejects.toBeInstanceOf(SecureStoreError);
+  });
+
+  it('set throws SecureStoreError in stub mode', async () => {
+    await expect(store.set('auth_token', 'jwt')).rejects.toBeInstanceOf(SecureStoreError);
+  });
+
+  it('delete throws SecureStoreError in stub mode', async () => {
+    await expect(store.delete('auth_token')).rejects.toBeInstanceOf(SecureStoreError);
+  });
+
+  it('SecureStoreError carries the underlying cause', async () => {
+    try {
+      await store.get('k');
+      expect.unreachable('should have thrown');
+    } catch (e) {
+      expect(e).toBeInstanceOf(SecureStoreError);
+      expect((e as SecureStoreError).cause).toBeDefined();
     }
   });
 });
