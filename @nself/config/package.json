@@ -17,6 +17,6 @@
     "isomorphic-dompurify": "^2.36.0"
   },
   "devDependencies": {
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6"
   }
 }

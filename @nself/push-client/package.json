@@ -20,7 +20,7 @@
     "@nself/graphql-client": "workspace:*"
   },
   "devDependencies": {
-    "vitest": "^2.1.9",
+    "vitest": "^3.2.6",
     "typescript": "^5"
   },
   "peerDependencies": {

@@ -21,7 +21,7 @@
     "@types/react": "^18.2.42",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6"
   },
   "peerDependencies": {
     "i18next": "^23.7.6",

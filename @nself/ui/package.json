@@ -54,6 +54,6 @@
     "jsdom": "^25",
     "tsup": "^8",
     "typescript": "^6.0.3",
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6"
   }
 }

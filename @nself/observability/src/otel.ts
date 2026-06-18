@@ -23,8 +23,8 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 /** Default OTel collector endpoint used when no override is provided. */
 const DEFAULT_OTEL_ENDPOINT = 'http://api.nself.org/v1/otlp';
@@ -87,13 +87,17 @@ export function initOtel(config: OtelConfig): void {
     (typeof process !== 'undefined' ? process.env['NSELF_OTEL_ENDPOINT'] : undefined) ??
     DEFAULT_OTEL_ENDPOINT;
 
-  const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: serviceName,
   });
 
   const exporter = new ZipkinExporter({ url: endpoint });
 
-  const provider = new NodeTracerProvider({ resource });
-  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+  // OTel SDK v2: span processors are passed to the provider constructor;
+  // the v1 `provider.addSpanProcessor(...)` mutator was removed.
+  const provider = new NodeTracerProvider({
+    resource,
+    spanProcessors: [new BatchSpanProcessor(exporter)],
+  });
   provider.register();
 }
