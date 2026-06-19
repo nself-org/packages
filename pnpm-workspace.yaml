@@ -1,6 +1,2 @@
 packages:
   - './@nself/*'
-  - '../apps/*'
-  - '../ntv'
-  - '../nfamily'
-  - '../clawde/apps/desktop'
