@@ -225,7 +225,7 @@ describe('codegen generated — getFragmentData', () => {
   it('returns fragment data unchanged (unmask helper)', () => {
     const fakeData = { __typename: 'User', id: 'abc' };
     // getFragmentData is the unmask helper — it returns its second arg as-is
-    const result = getFragmentData(null as never, fakeData);
+    const result = getFragmentData(null as never, fakeData as never);
     expect(result).toBe(fakeData);
   });
 

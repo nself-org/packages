@@ -9,6 +9,10 @@ const meta = {
   component: Input,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },
+  args: {
+    label: 'Label',
+    placeholder: 'Enter a value',
+  },
 } satisfies Meta<typeof Input>;
 
 export default meta;
@@ -16,23 +20,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    label: 'Value',
     placeholder: 'Enter a value',
   },
 };
 
 export const WithLabel: Story = {
-  render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '20rem' }}>
-      <label htmlFor="demo-input" style={{ fontSize: '0.875rem', fontWeight: 500 }}>
-        Task title
-      </label>
-      <Input id="demo-input" placeholder="Review pull request…" />
-    </div>
-  ),
+  args: {
+    label: 'Task title',
+    placeholder: 'Review pull request…',
+  },
 };
 
 export const Disabled: Story = {
   args: {
+    label: 'Disabled',
     placeholder: 'Disabled input',
     disabled: true,
   },
@@ -40,6 +42,7 @@ export const Disabled: Story = {
 
 export const ErrorState: Story = {
   args: {
+    label: 'Field with error',
     placeholder: 'Invalid value',
     'aria-invalid': true,
   },

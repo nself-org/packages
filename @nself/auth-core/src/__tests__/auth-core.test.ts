@@ -24,7 +24,8 @@ import { WebAuthStrategy, createWebAuthStrategy } from '../web.js';
 import { NativeAuthStrategy, SECURE_STORE_KEYS } from '../native.js';
 import { createAuthExchange, didAuthError, addTokenToOperation } from '../exchange.js';
 import type { OperationResult, Operation } from '@urql/core';
-import { createRequest, makeOperation, fromValue, pipe } from '@urql/core';
+import { createRequest, makeOperation } from '@urql/core';
+import { fromValue, pipe } from 'wonka';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -526,11 +527,12 @@ describe('didAuthError', () => {
 describe('addTokenToOperation', () => {
   function makeTestOperation(fetchOptions?: RequestInit | (() => RequestInit)): Operation {
     const request = createRequest<unknown, Record<string, never>>('{ hello }', {});
-    return makeOperation('query', request, {
+    const ctx = {
       url: 'http://localhost/graphql',
-      fetchOptions,
-      requestPolicy: 'cache-first',
-    });
+      requestPolicy: 'cache-first' as const,
+      ...(fetchOptions !== undefined ? { fetchOptions } : {}),
+    };
+    return makeOperation('query', request, ctx as import('@urql/core').OperationContext);
   }
 
   it('returns original operation when token is null', () => {
@@ -586,7 +588,7 @@ describe('createAuthExchange', () => {
     const store = makeMockSecureStore({});
     const strategy = new NativeAuthStrategy(store, {}, makeMockFetch([]));
     const exchange = createAuthExchange(strategy);
-    const forward = vi.fn((ops: never) => ops);
+    const forward = vi.fn((ops: import('wonka').Source<Operation>) => ops as unknown as import('wonka').Source<OperationResult>);
     const composed = exchange({ forward, client: {} as never, dispatchDebug: vi.fn() });
     expect(typeof composed).toBe('function');
   });
@@ -913,7 +915,7 @@ describe('createAuthExchange — wonka integration', () => {
 
     const mockStrategy = {
       getAccessToken: vi.fn(() => 'test-access-token'),
-      refresh: vi.fn(async () => {}),
+      refresh: vi.fn(async (): Promise<AuthState> => ({ status: 'authenticated' as const, user: { id: 'u', email: 'a@b.com', displayName: '', roles: [], defaultRole: 'user' }, jwt: 'tok' })),
       init: vi.fn(async () => ({ status: 'authenticated' as const, user: { id: 'u', email: 'a@b.com', displayName: '', roles: [], defaultRole: 'user' }, jwt: 'tok' })),
       login: vi.fn(async () => ({ status: 'unauthenticated' as const })),
       logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
@@ -926,7 +928,7 @@ describe('createAuthExchange — wonka integration', () => {
     const queryOp = makeOperation(
       'query',
       createRequest('query TestQuery { test }', {}),
-      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' } as import('@urql/core').OperationContext,
     );
 
     const receivedOps: Operation[] = [];
@@ -941,8 +943,6 @@ describe('createAuthExchange — wonka integration', () => {
           const mockResult: OperationResult = {
             operation: op,
             data: { test: true },
-            error: undefined,
-            extensions: undefined,
             hasNext: false,
             stale: false,
           };
@@ -966,7 +966,7 @@ describe('createAuthExchange — wonka integration', () => {
 
     expect(receivedOps).toHaveLength(1);
     expect(results).toHaveLength(1);
-    expect(results[0].data).toEqual({ test: true });
+    expect(results[0]!.data).toEqual({ test: true });
     expect(mockStrategy.getAccessToken).toHaveBeenCalled();
   });
 
@@ -1001,7 +1001,7 @@ describe('createAuthExchange — wonka integration', () => {
     const queryOp = makeOperation(
       'query',
       createRequest('query TestQuery { test }', {}),
-      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' } as import('@urql/core').OperationContext,
     );
 
     let forwardCallCount = 0;
@@ -1015,14 +1015,12 @@ describe('createAuthExchange — wonka integration', () => {
           // First call: return 401 auth error. Second call (retry): return success.
           const isRetry = forwardCallCount > 1;
           const result: OperationResult = isRetry
-            ? { operation: op, data: { test: 'retried' }, error: undefined, extensions: undefined, hasNext: false, stale: false }
+            ? { operation: op, data: { test: 'retried' }, hasNext: false, stale: false }
             : {
                 operation: op,
-                data: undefined,
                 error: new CombinedError({
                   graphQLErrors: [{ message: 'JWT expired', extensions: { code: 'jwt-expired' } }],
                 }),
-                extensions: undefined,
                 hasNext: false,
                 stale: false,
               };
@@ -1071,7 +1069,7 @@ describe('createAuthExchange — wonka integration', () => {
     const queryOp = makeOperation(
       'query',
       createRequest('query TestQuery { test }', {}),
-      { url: 'http://localhost/graphql', requestPolicy: 'network-only' },
+      { url: 'http://localhost/graphql', requestPolicy: 'network-only' } as import('@urql/core').OperationContext,
     );
 
     let forwardCallCount = 0;
@@ -1082,11 +1080,9 @@ describe('createAuthExchange — wonka integration', () => {
           forwardCallCount++;
           const result: OperationResult = {
             operation: op,
-            data: undefined,
             error: new CombinedError({
               graphQLErrors: [{ message: 'JWT expired', extensions: { code: 'jwt-expired' } }],
             }),
-            extensions: undefined,
             hasNext: false,
             stale: false,
           };
@@ -1111,6 +1107,6 @@ describe('createAuthExchange — wonka integration', () => {
     expect(mockStrategy.refresh).toHaveBeenCalledTimes(1);
     expect(forwardCallCount).toBe(1);
     // The original auth error is surfaced to the caller.
-    expect(results[0].error).toBeDefined();
+    expect(results[0]!.error).toBeDefined();
   });
 });

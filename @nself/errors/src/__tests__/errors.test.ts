@@ -224,7 +224,7 @@ describe('@nself/errors', () => {
     });
 
     it('isLicenseRequiredError() identifies license_required errors', () => {
-      const error: AppError = { code: 'license_required', message: 'License required', status: 402, requiredBundle: 'nclaw' };
+      const error: AppError = { code: 'license_required', message: 'License required', status: 402, bundleId: 'nclaw' };
       expect(isLicenseRequiredError(error)).toBe(true);
       expect(isInternalError(error)).toBe(false);
     });
@@ -277,7 +277,7 @@ describe('@nself/errors', () => {
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
         expect(result.value).toHaveLength(1);
-        expect(result.value[0].title).toBe('Hello');
+        expect(result.value[0]!.title).toBe('Hello');
       }
     });
 

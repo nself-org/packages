@@ -17,6 +17,7 @@ import {
   type NcLawJSIInterface,
   type Memory,
   type Topic,
+  type ChatSendResult,
 } from '../nclaw-jsi.js';
 
 // Reset the registry to stub state before each test.
@@ -101,6 +102,12 @@ describe('getNcLawJSI()', () => {
       async searchMemory(_q: string, _limit: number): Promise<Memory[]> {
         return [];
       },
+      async transcribe(_audioData: Uint8Array): Promise<string> {
+        return '';
+      },
+      async chatSend(_message: string, _conversationId: string | null, _memoryContext: string | null): Promise<ChatSendResult> {
+        return { conversationId: 'mock-conv', messageId: 'mock-msg', startedAt: new Date().toISOString() };
+      },
     };
 
     registerNcLawJSI(mockImpl);
@@ -123,6 +130,12 @@ describe('getNcLawJSI()', () => {
       },
       async searchMemory() {
         return [];
+      },
+      async transcribe() {
+        return '';
+      },
+      async chatSend() {
+        return { conversationId: 'mock-conv', messageId: 'mock-msg', startedAt: new Date().toISOString() };
       },
     };
 

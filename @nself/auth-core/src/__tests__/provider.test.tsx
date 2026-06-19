@@ -32,7 +32,7 @@ function makeMockStrategy(initialState: AuthState = { status: 'unauthenticated' 
     init: vi.fn(async () => initialState),
     login: vi.fn(async () => initialState),
     logout: vi.fn(async () => ({ status: 'unauthenticated' as const })),
-    refresh: vi.fn(async () => {}),
+    refresh: vi.fn(async (): Promise<AuthState> => ({ status: 'unauthenticated' as const })),
     subscribe: vi.fn((cb: Subscriber) => {
       subscribers.push(cb);
       return () => {
@@ -90,8 +90,8 @@ describe('NselfAuthProvider', () => {
   it('provides initial state from strategy.init()', async () => {
     const strategy = makeMockStrategy({
       status: 'authenticated',
-      user: { id: 'u1', email: 'a@b.com', displayName: 'Alice', role: 'user' },
-      jwt: { accessToken: 'tok', expiresAt: Date.now() + 60_000 },
+      user: { id: 'u1', email: 'a@b.com', displayName: 'Alice', roles: ['user'], defaultRole: 'user' },
+      jwt: 'tok',
     });
 
     const { result } = renderHook(() => useAuth(), {
@@ -117,8 +117,8 @@ describe('NselfAuthProvider', () => {
     act(() => {
       strategy._emit({
         status: 'authenticated',
-        user: { id: 'u2', email: 'b@c.com', displayName: 'Bob', role: 'user' },
-        jwt: { accessToken: 'tok2', expiresAt: Date.now() + 60_000 },
+        user: { id: 'u2', email: 'b@c.com', displayName: 'Bob', roles: ['user'], defaultRole: 'user' },
+        jwt: 'tok2',
       });
     });
 
@@ -198,8 +198,8 @@ describe('useAuthStrategy', () => {
   it('strategy.logout() can be called imperatively via the hook', async () => {
     const strategy = makeMockStrategy({
       status: 'authenticated',
-      user: { id: 'u1', email: 'a@b.com', displayName: 'Alice', role: 'user' },
-      jwt: { accessToken: 'tok', expiresAt: Date.now() + 60_000 },
+      user: { id: 'u1', email: 'a@b.com', displayName: 'Alice', roles: ['user'], defaultRole: 'user' },
+      jwt: 'tok',
     });
 
     const { result } = renderHook(() => useAuthStrategy(), {

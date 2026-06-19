@@ -3,6 +3,7 @@
  * QA-A compliance: covers script removal, safe tag preservation, javascript: href removal.
  */
 
+import { describe, it, expect } from 'vitest';
 import { sanitize, sanitizeWith } from '../sanitize';
 
 describe('sanitize()', () => {

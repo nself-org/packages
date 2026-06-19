@@ -3,6 +3,7 @@
  * Run: pnpm --dir packages/@nself/config test (or pnpm typecheck for type-only check)
  */
 
+import { describe, it, expect } from 'vitest';
 import { buildCsp } from '../csp';
 
 describe('buildCsp', () => {

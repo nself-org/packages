@@ -31,6 +31,10 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
+  args: {
+    result: 'loading' as const,
+    renderData: () => null,
+  },
 } satisfies Meta<typeof AsyncScreen>;
 
 export default meta;
@@ -52,7 +56,7 @@ function sampleData(): Task[] {
 }
 
 function makeError(code: AppError['code']): AppError {
-  const statusMap: Record<AppError['code'], number> = {
+  const statusMap = {
     auth_failed: 401,
     not_found: 404,
     forbidden: 403,
@@ -60,9 +64,9 @@ function makeError(code: AppError['code']): AppError {
     rate_limited: 429,
     internal: 500,
     license_required: 402,
-    tenant_mismatch: 409,
-  };
-  return { code, message: `[${code}] error`, status: statusMap[code] };
+    tenant_mismatch: 403,
+  } as const satisfies Record<AppError['code'], number>;
+  return { code, message: `[${code}] error`, status: statusMap[code] } as AppError;
 }
 
 // ─── State 1: Loading ─────────────────────────────────────────────────────────
