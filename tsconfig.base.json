@@ -28,11 +28,10 @@
       "@nself/native-bridge": ["./@nself/native-bridge/src/index.ts"],
       "@nself/push-client": ["./@nself/push-client/src/index.ts"],
       "@nself/i18n": ["./@nself/i18n/src/index.ts"],
-      "@nself/graphql-client": ["./@nself/graphql-client/src/index.ts"],
       "@nself/config": ["./@nself/config/src/index.ts"],
       "@nself/types": ["./@nself/types/src/index.ts"]
     }
   },
   "include": ["@nself/**/*.ts", "@nself/**/*.tsx"],
-  "exclude": ["node_modules", "dist", ".turbo", "**/@nself/*/dist/**", "**/node_modules/**"]
+  "exclude": ["node_modules", "dist", ".turbo", "**/@nself/*/dist/**", "**/node_modules/**", "**/*.stories.ts", "**/*.stories.tsx"]
 }

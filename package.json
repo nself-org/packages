@@ -32,7 +32,9 @@
       "@opentelemetry/core": ">=2.8.0",
       "postcss": ">=8.5.15",
       "@xmldom/xmldom": ">=0.8.13",
-      "js-yaml": ">=4.2.0"
+      "js-yaml": ">=4.2.0",
+      "react": "19.0.0",
+      "react-dom": "19.0.0"
     }
   }
 }
