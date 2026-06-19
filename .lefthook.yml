@@ -14,7 +14,7 @@ pre-commit:
 pre-push:
   commands:
     test:
-      run: pnpm test --filter "...(changed packages)"
+      run: pnpm --filter "@nself/*" test
     codegen-check:
       # Uses committed schema.graphql — no live Hasura endpoint needed. Fails if
       # generated/ is stale (generated types do not match schema + operations).
