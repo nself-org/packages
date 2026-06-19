@@ -84,6 +84,32 @@ function makeAuthFailedError(message: string): AppError {
 }
 
 /**
+ * parseWebSignInResponse — extract UserProfile from web sign-in body.
+ *
+ * Purpose: Extracted from WebAuthStrategy.login() to keep that method
+ *          under 50 lines. Web sign-in bodies only carry user fields
+ *          (no token — tokens are in the httpOnly cookie).
+ * Inputs:  body — raw parsed JSON from the sign-in endpoint.
+ * Outputs: UserProfile on success; { error: string } on malformed body.
+ * Constraints: Pure function — no side effects.
+ */
+function parseWebSignInResponse(
+  body: SignInResponse,
+): UserProfile | { error: string } {
+  const sessionUser = body.session?.user;
+  if (!sessionUser?.id || !sessionUser.email) {
+    return { error: 'Malformed sign-in response: missing user fields' };
+  }
+  return {
+    id: sessionUser.id,
+    email: sessionUser.email,
+    displayName: sessionUser.displayName ?? '',
+    roles: sessionUser.roles ?? [],
+    defaultRole: sessionUser.defaultRole ?? 'user',
+  };
+}
+
+/**
  * defaultMeBaseUrl — resolve the same-origin base for the /api/auth/me route.
  *
  * /api/auth/me is served by the app's own server (it reads the httpOnly cookie),
@@ -152,19 +178,13 @@ export class WebAuthStrategy implements AuthStrategy {
         body: JSON.stringify({ email, password }),
       });
     } catch {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Network error during sign-in'),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError('Network error during sign-in') };
       this.setState(state);
       return state;
     }
 
     if (!response.ok) {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError(`Sign-in failed: HTTP ${String(response.status)}`),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError(`Sign-in failed: HTTP ${String(response.status)}`) };
       this.setState(state);
       return state;
     }
@@ -173,34 +193,20 @@ export class WebAuthStrategy implements AuthStrategy {
     try {
       body = (await response.json()) as SignInResponse;
     } catch {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Invalid response from sign-in endpoint'),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError('Invalid response from sign-in endpoint') };
       this.setState(state);
       return state;
     }
 
-    const sessionUser = body.session?.user;
-    if (!sessionUser?.id || !sessionUser.email) {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Malformed sign-in response: missing user fields'),
-      };
+    const parsed = parseWebSignInResponse(body);
+    if ('error' in parsed) {
+      const state: AuthState = { status: 'error', error: makeAuthFailedError(parsed.error) };
       this.setState(state);
       return state;
     }
-
-    const profile: UserProfile = {
-      id: sessionUser.id,
-      email: sessionUser.email,
-      displayName: sessionUser.displayName ?? '',
-      roles: sessionUser.roles ?? [],
-      defaultRole: sessionUser.defaultRole ?? 'user',
-    };
 
     // Web: jwt is empty string — token is in the httpOnly cookie, not JS-accessible.
-    const state: AuthState = { status: 'authenticated', user: profile, jwt: '' };
+    const state: AuthState = { status: 'authenticated', user: parsed, jwt: '' };
     this.setState(state);
     return state;
   }

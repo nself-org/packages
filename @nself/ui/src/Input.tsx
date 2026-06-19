@@ -37,6 +37,19 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   hint?: string;
 }
 
+/**
+ * Input — accessible labeled input with optional error and hint text.
+ *
+ * Purpose: Shared form input primitive across nSelf web and admin UIs.
+ * Inputs:  InputProps — label (required), error, hint, plus native input attributes.
+ *          Ref-forwarded to the underlying <input>.
+ * Outputs: React.ReactElement — a div wrapping label + input + optional error/hint.
+ * Constraints:
+ *   - label is required (drives accessible htmlFor + auto-generated id).
+ *   - error sets aria-invalid and aria-describedby for screen readers.
+ *   - Uses inline styles; no Tailwind dependency at this primitive level.
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/ui
+ */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   function Input({ label, error, hint, id, name, type = 'text', style, ...rest }, ref) {
     const inputId = id ?? name ?? label.toLowerCase().replace(/\s+/g, '-');

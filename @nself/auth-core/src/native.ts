@@ -74,6 +74,45 @@ function makeAuthFailedError(message: string): AppError {
   return { code: 'auth_failed', message, status: 401 };
 }
 
+/**
+ * parseSignInResponse — validate and extract session fields from sign-in body.
+ *
+ * Purpose: Extracted from NativeAuthStrategy.login() to keep that method
+ *          under 50 lines. Returns TokenPair + UserProfile on success, or
+ *          an AppError string on malformed/missing fields.
+ * Inputs:  body — raw parsed JSON from the sign-in endpoint.
+ * Outputs: { tokenPair, user } on success; { error: string } on failure.
+ * Constraints: Pure function — no side effects, no network calls.
+ */
+function parseSignInResponse(
+  body: SignInResponse,
+): { tokenPair: TokenPair; user: UserProfile } | { error: string } {
+  const session = body.session;
+  if (
+    !session?.accessToken ||
+    !session.refreshToken ||
+    typeof session.accessTokenExpiresIn !== 'number' ||
+    !session.user?.id ||
+    !session.user.email
+  ) {
+    return { error: 'Malformed sign-in response: missing session fields' };
+  }
+  return {
+    tokenPair: {
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+      expiresAt: Date.now() + session.accessTokenExpiresIn * 1_000,
+    },
+    user: {
+      id: session.user.id,
+      email: session.user.email,
+      displayName: session.user.displayName ?? '',
+      roles: session.user.roles ?? [],
+      defaultRole: session.user.defaultRole ?? 'user',
+    },
+  };
+}
+
 function decodeUserFromJwt(accessToken: string): UserProfile | null {
   try {
     const parts = accessToken.split('.');
@@ -173,19 +212,13 @@ export class NativeAuthStrategy implements AuthStrategy {
         body: JSON.stringify({ email, password }),
       });
     } catch {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Network error during sign-in'),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError('Network error during sign-in') };
       this.setState(state);
       return state;
     }
 
     if (!response.ok) {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError(`Sign-in failed: HTTP ${String(response.status)}`),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError(`Sign-in failed: HTTP ${String(response.status)}`) };
       this.setState(state);
       return state;
     }
@@ -194,46 +227,20 @@ export class NativeAuthStrategy implements AuthStrategy {
     try {
       body = (await response.json()) as SignInResponse;
     } catch {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Invalid sign-in response from nHost'),
-      };
+      const state: AuthState = { status: 'error', error: makeAuthFailedError('Invalid sign-in response from nHost') };
       this.setState(state);
       return state;
     }
 
-    const session = body.session;
-    if (
-      !session?.accessToken ||
-      !session.refreshToken ||
-      typeof session.accessTokenExpiresIn !== 'number' ||
-      !session.user?.id ||
-      !session.user.email
-    ) {
-      const state: AuthState = {
-        status: 'error',
-        error: makeAuthFailedError('Malformed sign-in response: missing session fields'),
-      };
+    const parsed = parseSignInResponse(body);
+    if ('error' in parsed) {
+      const state: AuthState = { status: 'error', error: makeAuthFailedError(parsed.error) };
       this.setState(state);
       return state;
     }
 
-    const tokenPair: TokenPair = {
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      expiresAt: Date.now() + session.accessTokenExpiresIn * 1_000,
-    };
-
+    const { tokenPair, user } = parsed;
     await this.writeTokenPair(tokenPair);
-
-    const user: UserProfile = {
-      id: session.user.id,
-      email: session.user.email,
-      displayName: session.user.displayName ?? '',
-      roles: session.user.roles ?? [],
-      defaultRole: session.user.defaultRole ?? 'user',
-    };
-
     const state: AuthState = { status: 'authenticated', user, jwt: tokenPair.accessToken };
     this.setState(state);
     this.startRefreshLoop(tokenPair);

@@ -90,6 +90,19 @@ function Spinner(): React.ReactElement {
   );
 }
 
+/**
+ * Button — accessible button with variant, size, and loading state.
+ *
+ * Purpose: Shared interactive button primitive across nSelf web and admin UIs.
+ * Inputs:  ButtonProps — variant, size, loading, disabled, type, style, children,
+ *          plus native button attributes. Ref-forwarded to the underlying <button>.
+ * Outputs: React.ReactElement — a styled <button> with optional spinner.
+ * Constraints:
+ *   - loading=true disables the button automatically.
+ *   - Spinner animation requires the 'spin' keyframe in the host stylesheet.
+ *   - Uses inline styles; no Tailwind dependency at this primitive level.
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/ui
+ */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
     {

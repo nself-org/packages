@@ -1,237 +1,41 @@
 /**
- * @nself/native-bridge — NclawModule NitroModules HybridObject spec.
+ * NclawModule.nitro.ts — Group D async HybridObject specs + unified NclawModule facade.
  *
- * Purpose: Typed TypeScript interface for the libnclaw Rust→RN JSI seam via
- *          react-native-nitro-modules. Exposes every C-ABI symbol from the FFI
- *          audit (T-P3-E4-W1-S1-T02 §5 JSI Target Signatures) as typed JSI calls.
- *          Replaces nclaw/mobile's dart:ffi bindings.
+ * Purpose: Define TypeScript interfaces for the planned async FFI groups (D: db/llm/vault/sync)
+ *          and the top-level NclawModule HybridObject that exposes all groups as sub-modules.
+ *          Opaque handles and synchronous groups (A/B/C) live in NclawModule.interfaces.ts.
+ *          Stub implementations and registry live in NclawModule.stub.ts.
  *
- * Inputs:  All method parameters are typed per the FFI audit §5 Groups A–D.
- *          Opaque handles (NativeDeviceKeypair, NativeSessionCipher) are
- *          NativeState objects whose destructors call the corresponding
- *          libnclaw_*_free functions — JS GC triggers Rust deallocation.
- *
- * Outputs: All async methods return Promise<T>. Sync methods (crypto ops that
- *          are sub-microsecond, atomic flag setters) are typed as synchronous
- *          T (not Promise<T>). All Rust errors propagate as JS Error objects.
+ * Inputs:  Sub-interface types imported from NclawModule.interfaces.ts.
+ * Outputs: NclawDbModule, NclawLlmModule, NclawVaultModule, NclawSyncModule (Group D);
+ *          NclawModule (unified facade); re-exports from NclawModule.stub.ts.
  *
  * Constraints:
- *   - libnclaw_free_string and libnclaw_last_error are INTERNAL to native code;
- *     they are NOT exposed in this TypeScript interface. Native implementations
- *     handle memory bookkeeping before crossing the JSI boundary.
- *   - libnclaw_keypair_free and libnclaw_cipher_free are handled by NativeState
- *     destructors in iOS/Android implementations; not exposed directly.
- *   - Every *mut c_char return in native code must have nclaw_free_string()
- *     called immediately after copying to NSString / jstring.
- *   - All blocking FFI calls run on a dedicated background queue (iOS
- *     DispatchQueue / Android HandlerThread) — never on the JS thread.
- *   - libnclaw_last_error() is thread-local: native code MUST call it on the
- *     same thread as the failing FFI call before returning to JS.
+ *   - Group D symbols have NO current Rust implementation — planned for S15.T18+.
+ *   - All Group D methods are Promise<T> (I/O-bound: SQLite, model load, network).
+ *   - libnclaw_last_error is INTERNAL to native; not exposed here.
+ *   - This file is the canonical single import for consumers:
+ *       import { NativeNclaw } from '@nself/native-bridge';
  *
  * SPORT: F08-SERVICE-INVENTORY.md — libnclaw JSI bridge in native-bridge package
- * Cross-ref: T-P3-E4-W1-S1-T02 (FFI symbol audit — §5 is the authoritative spec)
- *            T-P3-E4-W2-S3-T03 (this implementation ticket)
- *            nclaw/core/src/lib.rs (symbols 1–10)
- *            nclaw/core/src/mobile_ffi.rs (symbols 11–13)
- *            nclaw/core/src/api.rs (symbols 14–16, frb-generated)
+ * Cross-ref: NclawModule.interfaces.ts (Groups A–C + opaque handles)
+ *            NclawModule.stub.ts (stubs + registry)
+ *            T-P3-E4-W1-S1-T02 (FFI symbol audit — §5 Group D)
  */
 
-// =============================================================================
-// NativeState opaque handles
-//
-// NativeDeviceKeypair and NativeSessionCipher are opaque handles wrapping
-// Rust-allocated structs (FfiDeviceKeypair*, FfiSessionCipher*). The native
-// implementation (iOS NclawModule.mm / Android NclawModule.kt) wraps each
-// in a NativeState whose destructor calls the corresponding libnclaw_*_free.
-//
-// TypeScript sees them as branded opaque types — callers cannot construct
-// them directly; they are returned by keypairGenerate() / keypairDh().
-// =============================================================================
+import type {
+  NclawCryptoModule,
+  NclawDampersModule,
+  NclawCoreModule,
+} from './NclawModule.interfaces.js';
 
-/**
- * NativeDeviceKeypair — opaque handle for a Rust FfiDeviceKeypair.
- *
- * Returned by keypairGenerate(). Freed automatically when the JS object is
- * garbage-collected (via NativeState destructor → libnclaw_keypair_free).
- * Do NOT hold long-lived references; call keypairFree() when done.
- */
-export interface NativeDeviceKeypair {
-  /** Opaque brand — prevents accidental construction of plain objects. */
-  readonly __brand: 'NativeDeviceKeypair';
-}
-
-/**
- * NativeSessionCipher — opaque handle for a Rust FfiSessionCipher.
- *
- * Returned by keypairDh(). Freed automatically when the JS object is
- * garbage-collected (via NativeState destructor → libnclaw_cipher_free).
- * Do NOT hold long-lived references; call cipherFree() when done.
- */
-export interface NativeSessionCipher {
-  /** Opaque brand — prevents accidental construction of plain objects. */
-  readonly __brand: 'NativeSessionCipher';
-}
-
-// =============================================================================
-// Group A — NclawCryptoModule HybridObject spec
-//
-// Maps FFI audit §5 Group A: crypto + handshake symbols (lib.rs symbols 2–9).
-// All crypto ops are sub-microsecond CPU-bound; they run synchronously on a
-// background dispatch queue and return synchronous T (not Promise<T>).
-//
-// libnclaw_last_error (symbol 1) and libnclaw_free_string (symbol 3) are
-// INTERNAL to native implementations; not exposed here.
-// libnclaw_keypair_free (symbol 6) and libnclaw_cipher_free (symbol 10) are
-// handled by NativeState destructors; not exposed as callable methods.
-// =============================================================================
-
-/**
- * NclawCryptoModule — NitroModules HybridObject spec for crypto/handshake FFI.
- *
- * Implemented by native code (NclawCryptoModule.mm / NclawCryptoModule.kt).
- * All methods are synchronous: X25519 keygen/DH and XChaCha20-Poly1305
- * encrypt/decrypt are sub-microsecond — blocking the JS thread is acceptable.
- * Error convention: returns null on failure; callers must check null and throw.
- * Native code captures libnclaw_last_error() on the call thread.
- */
-export interface NclawCryptoModule {
-  /**
-   * Get the libnclaw version string.
-   * Maps: libnclaw_version() → *const c_char (static lifetime — DO NOT free).
-   * @returns version string, e.g. "0.1.0"
-   */
-  getVersion(): string;
-
-  /**
-   * Generate a new X25519 device keypair.
-   * Maps: libnclaw_keypair_generate() → *mut FfiDeviceKeypair.
-   * @returns NativeDeviceKeypair handle; NativeState destructor calls libnclaw_keypair_free.
-   * @throws Error with Rust error message if keypair generation fails.
-   */
-  keypairGenerate(): NativeDeviceKeypair;
-
-  /**
-   * Get the base64-encoded public key for a keypair.
-   * Maps: libnclaw_keypair_public_b64(kp) → *mut c_char (caller owns — nclaw_free_string).
-   * Native code copies string to JS and calls libnclaw_free_string immediately.
-   * @param kp — device keypair handle from keypairGenerate()
-   * @returns base64-encoded public key string
-   * @throws Error with Rust error message on failure.
-   */
-  keypairPublicB64(kp: NativeDeviceKeypair): string;
-
-  /**
-   * Perform X25519 Diffie-Hellman key exchange to produce a session cipher.
-   * Maps: libnclaw_keypair_dh(kp, remote_pub_b64) → *mut FfiSessionCipher.
-   * @param kp           — local device keypair handle
-   * @param remotePubB64 — base64-encoded remote public key (must be valid UTF-8 + base64)
-   * @returns NativeSessionCipher handle; NativeState destructor calls libnclaw_cipher_free.
-   * @throws Error with Rust error message if DH fails or remotePubB64 is malformed.
-   */
-  keypairDh(kp: NativeDeviceKeypair, remotePubB64: string): NativeSessionCipher;
-
-  /**
-   * Encrypt plaintext using XChaCha20-Poly1305.
-   * Maps: libnclaw_cipher_encrypt(cipher, plaintext) → *mut c_char.
-   * Native code copies result to JS and calls libnclaw_free_string immediately.
-   * @param cipher    — session cipher handle from keypairDh()
-   * @param plaintext — string to encrypt
-   * @returns encrypted wire-format string (base64 + nonce)
-   * @throws Error with Rust error message on encryption failure.
-   */
-  cipherEncrypt(cipher: NativeSessionCipher, plaintext: string): string;
-
-  /**
-   * Decrypt a wire-format string using XChaCha20-Poly1305.
-   * Maps: libnclaw_cipher_decrypt(cipher, wire) → *mut c_char.
-   * Native code copies result to JS and calls libnclaw_free_string immediately.
-   * @param cipher — session cipher handle from keypairDh()
-   * @param wire   — encrypted wire-format string
-   * @returns decrypted plaintext string
-   * @throws Error with Rust error message on decryption failure (MAC mismatch, etc.).
-   */
-  cipherDecrypt(cipher: NativeSessionCipher, wire: string): string;
-}
-
-// =============================================================================
-// Group B — NclawDampersModule HybridObject spec
-//
-// Maps FFI audit §5 Group B: platform damper symbols (mobile_ffi.rs symbols 11–13).
-// All are atomic flag stores — sub-microsecond; synchronous T return is correct.
-// =============================================================================
-
-/**
- * NclawDampersModule — NitroModules HybridObject spec for platform dampers.
- *
- * iOS: setLowPower wires UIDevice.isLowPowerModeEnabled notification + FFI call.
- *      setBatteryPct wires UIDevice.batteryLevel (requires isBatteryMonitoringEnabled=true).
- *      setThermalLevel wires ProcessInfo.thermalState (planned, iOS 11+).
- * Android: All three wire BatteryManager + PowerManager APIs + JNI call.
- */
-export interface NclawDampersModule {
-  /**
-   * Notify Rust core of low-power mode change.
-   * Maps: nclaw_set_low_power(flag: bool) — atomic store, no return.
-   * @param flag — true when device is in low-power mode
-   */
-  setLowPower(flag: boolean): void;
-
-  /**
-   * Update Rust core with current battery percentage.
-   * Maps: nclaw_set_battery_pct(pct: u8) — atomic store, no return.
-   * JS number is clamped to [0, 100] before crossing FFI boundary.
-   * @param pct — battery level 0–100
-   */
-  setBatteryPct(pct: number): void;
-
-  /**
-   * Update Rust core with current thermal throttle level.
-   * Maps: nclaw_set_thermal_level(level: u8) — atomic store, no return.
-   * JS number is clamped to [0, 3] before crossing FFI boundary.
-   * Level semantics: 0=nominal, 1=fair, 2=serious, 3=critical.
-   * @param level — thermal level 0–3
-   */
-  setThermalLevel(level: number): void;
-}
-
-// =============================================================================
-// Group C — NclawCoreModule HybridObject spec
-//
-// Maps FFI audit §5 Group C: flutter_rust_bridge (frb) symbols (api.rs symbols 14–16).
-// frb generates Dart FFI bindings automatically; JSI port must implement manually.
-// All are sync (#[frb(sync)]) pure-computation functions.
-// =============================================================================
-
-/**
- * NclawCoreModule — NitroModules HybridObject spec for frb-ported core functions.
- *
- * These are manually ported from flutter_rust_bridge api.rs since frb generates
- * only Dart bindings. Sync because all are CPU-bound with no I/O.
- */
-export interface NclawCoreModule {
-  /**
-   * Get the nclaw version string (frb port of nclaw_version → String).
-   * Maps: frb symbol 14 — pub fn nclaw_version() → String.
-   * @returns version string
-   */
-  nclawVersion(): string;
-
-  /**
-   * Probe device capabilities and return JSON-encoded DeviceProbe.
-   * Maps: frb symbol 15 — pub fn probe_device() → String.
-   * @returns JSON string of DeviceProbe struct
-   */
-  probeDevice(): string;
-
-  /**
-   * Classify device performance tier based on probe result.
-   * Maps: frb symbol 16 — pub fn classify_tier(probe_json: String, allow_t4: bool) → String.
-   * @param probeJson — JSON string from probeDevice()
-   * @param allowT4   — whether to allow Tier-4 (lowest) classification
-   * @returns JSON string of tier classification result
-   */
-  classifyTier(probeJson: string, allowT4: boolean): string;
-}
+export type {
+  NativeDeviceKeypair,
+  NativeSessionCipher,
+  NclawCryptoModule,
+  NclawDampersModule,
+  NclawCoreModule,
+} from './NclawModule.interfaces.js';
 
 // =============================================================================
 // Group D — Planned async modules (NclawDbModule, NclawLlmModule,
@@ -558,240 +362,12 @@ export interface NclawModule {
   readonly sync: NclawSyncModule;
 }
 
-// =============================================================================
-// NclawModuleStub — NOT_IMPLEMENTED placeholder
-//
-// Returned by getNativeNclaw() until the nclaw/mobile native module
-// registers the real react-native-nitro-modules implementation.
-// Every method throws a descriptive error so callers detect missing native
-// module at runtime rather than getting silent no-ops.
-// =============================================================================
-
-/**
- * NclawModuleNotImplementedError — thrown by NclawModuleStub for every method.
- */
-export class NclawModuleNotImplementedError extends Error {
-  readonly code = 'nclaw_native_not_implemented' as const;
-
-  constructor(method: string) {
-    super(
-      `NativeNclaw.${method}() is not implemented. ` +
-        'The libnclaw JSI native module (react-native-nitro-modules) has not been registered. ' +
-        'Ensure nclaw/mobile has completed the native module bootstrap (T-P3-E4-W2-S3-T04).',
-    );
-    this.name = 'NclawModuleNotImplementedError';
-  }
-}
-
-/** Stub implementation of NclawCryptoModule — throws on all calls. */
-class NclawCryptoModuleStub implements NclawCryptoModule {
-  getVersion(): string {
-    throw new NclawModuleNotImplementedError('crypto.getVersion');
-  }
-  keypairGenerate(): NativeDeviceKeypair {
-    throw new NclawModuleNotImplementedError('crypto.keypairGenerate');
-  }
-  keypairPublicB64(_kp: NativeDeviceKeypair): string {
-    throw new NclawModuleNotImplementedError('crypto.keypairPublicB64');
-  }
-  keypairDh(
-    _kp: NativeDeviceKeypair,
-    _remotePubB64: string,
-  ): NativeSessionCipher {
-    throw new NclawModuleNotImplementedError('crypto.keypairDh');
-  }
-  cipherEncrypt(
-    _cipher: NativeSessionCipher,
-    _plaintext: string,
-  ): string {
-    throw new NclawModuleNotImplementedError('crypto.cipherEncrypt');
-  }
-  cipherDecrypt(_cipher: NativeSessionCipher, _wire: string): string {
-    throw new NclawModuleNotImplementedError('crypto.cipherDecrypt');
-  }
-}
-
-/** Stub implementation of NclawDampersModule — all are safe no-ops. */
-class NclawDampersModuleStub implements NclawDampersModule {
-  setLowPower(_flag: boolean): void {
-    // Intentional no-op stub — damper setters are fire-and-forget.
-  }
-  setBatteryPct(_pct: number): void {
-    // Intentional no-op stub.
-  }
-  setThermalLevel(_level: number): void {
-    // Intentional no-op stub.
-  }
-}
-
-/** Stub implementation of NclawCoreModule — throws on all calls. */
-class NclawCoreModuleStub implements NclawCoreModule {
-  nclawVersion(): string {
-    throw new NclawModuleNotImplementedError('core.nclawVersion');
-  }
-  probeDevice(): string {
-    throw new NclawModuleNotImplementedError('core.probeDevice');
-  }
-  classifyTier(_probeJson: string, _allowT4: boolean): string {
-    throw new NclawModuleNotImplementedError('core.classifyTier');
-  }
-}
-
-/** Stub implementation of NclawDbModule — throws on all calls. */
-class NclawDbModuleStub implements NclawDbModule {
-  async initDb(_dbPath: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('db.initDb');
-  }
-  async dbInsertMessage(_messageJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('db.dbInsertMessage');
-  }
-  async dbQueryByTopic(_topic: string): Promise<string> {
-    throw new NclawModuleNotImplementedError('db.dbQueryByTopic');
-  }
-  async dbVectorSearch(
-    _embedding: Float32Array,
-    _limit: number,
-  ): Promise<string> {
-    throw new NclawModuleNotImplementedError('db.dbVectorSearch');
-  }
-  async dbClear(): Promise<void> {
-    throw new NclawModuleNotImplementedError('db.dbClear');
-  }
-}
-
-/** Stub implementation of NclawLlmModule — throws on all calls. */
-class NclawLlmModuleStub implements NclawLlmModule {
-  onToken: ((token: string) => void) | null = null;
-  onDone: (() => void) | null = null;
-
-  async initLlm(_modelPath: string, _configJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('llm.initLlm');
-  }
-  llmInferStream(_prompt: string, _maxTokens: number): void {
-    throw new NclawModuleNotImplementedError('llm.llmInferStream');
-  }
-  async llmEmbed(_text: string): Promise<Float32Array> {
-    throw new NclawModuleNotImplementedError('llm.llmEmbed');
-  }
-  llmIsReady(): boolean {
-    return false; // Safe: false is the correct state when no native module is loaded.
-  }
-  llmUnload(): void {
-    // Intentional no-op stub.
-  }
-}
-
-/** Stub implementation of NclawVaultModule — throws on all calls. */
-class NclawVaultModuleStub implements NclawVaultModule {
-  async initVault(_namespace: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('vault.initVault');
-  }
-  async vaultSet(_key: string, _secret: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('vault.vaultSet');
-  }
-  async vaultGet(_key: string): Promise<string | null> {
-    throw new NclawModuleNotImplementedError('vault.vaultGet');
-  }
-  async vaultDelete(_key: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('vault.vaultDelete');
-  }
-  async vaultContains(_key: string): Promise<boolean> {
-    throw new NclawModuleNotImplementedError('vault.vaultContains');
-  }
-}
-
-/** Stub implementation of NclawSyncModule — throws on all calls. */
-class NclawSyncModuleStub implements NclawSyncModule {
-  async initSync(_serverUrl: string, _jwt: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('sync.initSync');
-  }
-  async syncPush(_eventsJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('sync.syncPush');
-  }
-  async syncPull(_cursor: string): Promise<string> {
-    throw new NclawModuleNotImplementedError('sync.syncPull');
-  }
-  async syncAck(_eventIdsJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('sync.syncAck');
-  }
-}
-
-/**
- * NclawModuleStub — full NclawModule NOT_IMPLEMENTED placeholder.
- *
- * Returned by getNativeNclaw() until registerNativeNclaw() is called.
- * chatSend() and all primary methods throw NclawModuleNotImplementedError.
- */
-export class NclawModuleStub implements NclawModule {
-  readonly crypto: NclawCryptoModule = new NclawCryptoModuleStub();
-  readonly dampers: NclawDampersModule = new NclawDampersModuleStub();
-  readonly core: NclawCoreModule = new NclawCoreModuleStub();
-  readonly db: NclawDbModule = new NclawDbModuleStub();
-  readonly llm: NclawLlmModule = new NclawLlmModuleStub();
-  readonly vault: NclawVaultModule = new NclawVaultModuleStub();
-  readonly sync: NclawSyncModule = new NclawSyncModuleStub();
-
-  async chatSend(_message: string): Promise<string> {
-    throw new NclawModuleNotImplementedError('chatSend');
-  }
-  async memorySearch(_query: string, _limit: number): Promise<string> {
-    throw new NclawModuleNotImplementedError('memorySearch');
-  }
-  async memoryInsert(_messageJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('memoryInsert');
-  }
-  async memoryReplace(_id: string, _messageJson: string): Promise<void> {
-    throw new NclawModuleNotImplementedError('memoryReplace');
-  }
-}
-
-// =============================================================================
-// Registry — runtime registration/retrieval of the real native implementation
-// =============================================================================
-
-/** Module-level registry holding the active NativeNclaw implementation. */
-let _nativeNclaw: NclawModule = new NclawModuleStub();
-
-/**
- * Register the real NativeNclaw implementation.
- *
- * Called once by nclaw/mobile's native module bootstrap (T-P3-E4-W2-S3-T04).
- * After registration, getNativeNclaw() returns the real native implementation.
- * @param impl — native module instance implementing NclawModule
- */
-export function registerNativeNclaw(impl: NclawModule): void {
-  _nativeNclaw = impl;
-}
-
-/**
- * Retrieve the active NativeNclaw implementation.
- *
- * Returns the stub (NclawModuleStub) until registerNativeNclaw() is called.
- * Returns the real native implementation after nclaw/mobile bootstrap.
- *
- * Pattern: always call getNativeNclaw().chatSend(...) rather than holding a
- * reference, so hot-swapping works correctly in tests.
- */
-export function getNativeNclaw(): NclawModule {
-  return _nativeNclaw;
-}
-
-/**
- * NativeNclaw — convenience re-export of getNativeNclaw().
- *
- * nclaw/mobile imports this as:
- *   import { NativeNclaw } from '@nself/native-bridge';
- *   await NativeNclaw.chatSend('hello');
- *
- * This is a getter-backed proxy so hot-swapping via registerNativeNclaw()
- * is reflected immediately without re-importing.
- */
-export const NativeNclaw: NclawModule = new Proxy({} as NclawModule, {
-  get(_target, prop: string | symbol): unknown {
-    const impl = getNativeNclaw();
-    // Cast through unknown to access dynamic property — NclawModule interface
-    // does not have an index signature (intentional strict typing), but the
-    // proxy must route all property accesses to the live implementation.
-    return (impl as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
+// Stubs, registry, and NativeNclaw proxy are in NclawModule.stub.ts.
+// Index re-exports all public symbols from both files via NclawModule.nitro.js imports.
+export {
+  NclawModuleNotImplementedError,
+  NclawModuleStub,
+  registerNativeNclaw,
+  getNativeNclaw,
+  NativeNclaw,
+} from './NclawModule.stub.js';
