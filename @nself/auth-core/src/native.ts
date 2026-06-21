@@ -22,130 +22,37 @@ import type {
   AuthStrategy,
   SecureStoreInterface,
   TokenPair,
-  UserProfile,
 } from './types.js';
-import type { AppError } from '@nself/errors';
 import {
   scheduleRefresh,
   callRefresh,
   DEFAULT_REFRESH_BUFFER_MS,
   type RefreshResult,
 } from './refresh.js';
+import {
+  DEFAULT_AUTH_BASE_URL,
+  SIGNIN_PATH,
+  SIGNOUT_PATH,
+  SECURE_STORE_KEYS,
+  type SignInResponse,
+  makeAuthFailedError,
+  parseSignInResponse,
+  decodeUserFromJwt,
+} from './native.helpers.js';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-/** Default nHost Auth base URL. */
-const DEFAULT_AUTH_BASE_URL = 'https://api.nself.org/v1/auth';
-
-/** nHost sign-in endpoint. */
-const SIGNIN_PATH = '/signin/email-password';
-
-/** nHost sign-out endpoint. */
-const SIGNOUT_PATH = '/signout';
-
-/** SecureStore keys — namespaced to avoid collisions with other packages. */
-export const SECURE_STORE_KEYS = {
-  ACCESS_TOKEN: '@nself/auth-core/accessToken',
-  REFRESH_TOKEN: '@nself/auth-core/refreshToken',
-  EXPIRES_AT: '@nself/auth-core/expiresAt',
-  USER_PROFILE: '@nself/auth-core/userProfile',
-} as const;
-
-// ─── Response types ───────────────────────────────────────────────────────────
-
-interface SignInResponse {
-  session?: {
-    accessToken?: string;
-    refreshToken?: string;
-    accessTokenExpiresIn?: number;
-    user?: {
-      id?: string;
-      email?: string;
-      displayName?: string;
-      roles?: string[];
-      defaultRole?: string;
-    };
-  };
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function makeAuthFailedError(message: string): AppError {
-  return { code: 'auth_failed', message, status: 401 };
-}
-
-/**
- * parseSignInResponse — validate and extract session fields from sign-in body.
- *
- * Purpose: Extracted from NativeAuthStrategy.login() to keep that method
- *          under 50 lines. Returns TokenPair + UserProfile on success, or
- *          an AppError string on malformed/missing fields.
- * Inputs:  body — raw parsed JSON from the sign-in endpoint.
- * Outputs: { tokenPair, user } on success; { error: string } on failure.
- * Constraints: Pure function — no side effects, no network calls.
- */
-function parseSignInResponse(
-  body: SignInResponse,
-): { tokenPair: TokenPair; user: UserProfile } | { error: string } {
-  const session = body.session;
-  if (
-    !session?.accessToken ||
-    !session.refreshToken ||
-    typeof session.accessTokenExpiresIn !== 'number' ||
-    !session.user?.id ||
-    !session.user.email
-  ) {
-    return { error: 'Malformed sign-in response: missing session fields' };
-  }
-  return {
-    tokenPair: {
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      expiresAt: Date.now() + session.accessTokenExpiresIn * 1_000,
-    },
-    user: {
-      id: session.user.id,
-      email: session.user.email,
-      displayName: session.user.displayName ?? '',
-      roles: session.user.roles ?? [],
-      defaultRole: session.user.defaultRole ?? 'user',
-    },
-  };
-}
-
-function decodeUserFromJwt(accessToken: string): UserProfile | null {
-  try {
-    const parts = accessToken.split('.');
-    if (parts.length !== 3 || !parts[1]) return null;
-    const payload = JSON.parse(atob(parts[1])) as Record<string, unknown>;
-    const claims = payload['https://hasura.io/jwt/claims'] as Record<string, unknown> | undefined;
-    const id = typeof payload['sub'] === 'string' ? payload['sub'] : null;
-    const email = typeof payload['email'] === 'string' ? payload['email'] : null;
-    if (!id || !email) return null;
-    return {
-      id,
-      email,
-      displayName: typeof payload['display_name'] === 'string' ? payload['display_name'] : '',
-      roles: Array.isArray(claims?.['x-hasura-allowed-roles'])
-        ? (claims['x-hasura-allowed-roles'] as string[])
-        : [],
-      defaultRole:
-        typeof claims?.['x-hasura-default-role'] === 'string'
-          ? (claims['x-hasura-default-role'] as string)
-          : 'user',
-    };
-  } catch {
-    return null;
-  }
-}
+export { SECURE_STORE_KEYS } from './native.helpers.js';
 
 // ─── NativeAuthStrategy ───────────────────────────────────────────────────────
 
 /**
  * NativeAuthStrategy — Bearer token auth for React Native and Tauri desktop.
  *
- * Tokens are stored in the platform's secure store and injected as Authorization
- * headers via getAccessToken() which authExchange calls per-request.
+ * Purpose: Full AuthStrategy implementation that persists tokens in the
+ *          platform secure store and manages the token refresh lifecycle.
+ * Inputs:  SecureStoreInterface, AuthConfig (optional), fetchFn (optional).
+ * Outputs: AuthStrategy conformant class.
+ * Constraints: See file-level constraints above. Internal helpers in native.helpers.ts.
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/auth-core (NativeAuthStrategy)
  */
 export class NativeAuthStrategy implements AuthStrategy {
   private readonly store: SecureStoreInterface;
@@ -380,13 +287,7 @@ export class NativeAuthStrategy implements AuthStrategy {
   }
 }
 
-/**
- * createNativeAuthStrategy — factory for NativeAuthStrategy.
- *
- * @param store    SecureStoreInterface implementation (from native-bridge or tauri-bridge).
- * @param config   Optional AuthConfig overrides.
- * @param fetchFn  Optional fetch override for testing.
- */
+/** createNativeAuthStrategy — factory; see class for param docs. */
 export function createNativeAuthStrategy(
   store: SecureStoreInterface,
   config: AuthConfig = {},

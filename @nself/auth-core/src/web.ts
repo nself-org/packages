@@ -290,12 +290,7 @@ export class WebAuthStrategy implements AuthStrategy {
   }
 }
 
-/**
- * createWebAuthStrategy — factory for WebAuthStrategy.
- *
- * @param config   Optional AuthConfig overrides.
- * @param fetchFn  Optional fetch override for testing.
- */
+/** createWebAuthStrategy — factory; see class for param docs. */
 export function createWebAuthStrategy(
   config: AuthConfig = {},
   fetchFn: typeof fetch = globalThis.fetch,
