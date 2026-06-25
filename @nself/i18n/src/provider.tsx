@@ -85,6 +85,18 @@ export interface NselfI18nProviderProps {
   children: ReactNode
 }
 
+/**
+ * NselfI18nProvider — React context provider that initialises i18next on mount.
+ *
+ * Purpose: Wrap the app (or a subtree) to ensure i18next is loaded with the
+ *          correct locale before any child calls useNselfI18n().
+ * Inputs:  NselfI18nProviderProps — locale (defaults to 'en'), children.
+ * Outputs: React.FC that renders children inside an i18next-ready context.
+ * Constraints:
+ *   - Must be an ancestor of any component using useNselfI18n().
+ *   - Locale changes re-initialise i18next (effect dependency on locale).
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/i18n
+ */
 export const NselfI18nProvider: React.FC<NselfI18nProviderProps> = ({
   locale = 'en',
   children

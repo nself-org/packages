@@ -36,6 +36,18 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
+/**
+ * Card — surface container with optional header and footer slots.
+ *
+ * Purpose: Provide a consistent card surface (border, shadow, rounded corners)
+ *          across nSelf web and admin UIs.
+ * Inputs:  CardProps — header, footer, children, plus native div attributes.
+ * Outputs: React.ReactElement — a styled div with header/content/footer regions.
+ * Constraints:
+ *   - Inline styles only (no Tailwind class dependency at this level).
+ *   - header/footer are optional; rendered only when defined.
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/ui
+ */
 export function Card({ header, footer, children, style, ...rest }: CardProps): React.ReactElement {
   return (
     <div

@@ -79,6 +79,18 @@ const PROFILE_OPTIONS: Record<SanitizeProfile, SanitizeOptions> = {
   },
 };
 
+/**
+ * sanitizeWith — sanitize an HTML string using a named profile.
+ *
+ * Purpose: Apply a pre-defined allowlist (SanitizeProfile) to untrusted HTML input
+ *          before rendering. Prevents XSS by stripping tags/attributes not in the
+ *          profile.
+ * Inputs:  dirty — raw untrusted HTML string.
+ *          profile — named profile key from PROFILE_OPTIONS.
+ * Outputs: Sanitized HTML string safe for innerHTML assignment.
+ * Constraints: 'plain-text-only' strips ALL tags; use for user-provided text content.
+ * SPORT: F08-SERVICE-INVENTORY.md — @nself/config security utilities
+ */
 export function sanitizeWith(dirty: string, profile: SanitizeProfile): string {
   return sanitize(dirty, PROFILE_OPTIONS[profile]);
 }

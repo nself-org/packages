@@ -1,18 +1,24 @@
-# nSelf Hasura GraphQL Schema Snapshot — PLACEHOLDER (NOT the real schema)
+# nSelf Hasura GraphQL Schema — generated from Hasura introspection (staging 167.235.233.65)
 #
-# WARNING: This is a hand-written skeleton, NOT generated from a live Hasura
-#          endpoint. It contains only scalars + health/placeholder root fields.
-#          It produces an effectively empty typed-operation surface; consuming
-#          apps get NO real compile-time GraphQL safety until it is replaced.
+# DO NOT hand-edit this file. Regenerate with:
+#   HASURA_GRAPHQL_ENDPOINT=http://167.235.233.65:8080 \
+#   HASURA_ADMIN_SECRET=$HASURA_STAGING_ADMIN_SECRET \
+#   pnpm --filter @nself/graphql-client codegen:live
 #
-# Purpose: Lets codegen run offline/in CI without network or an admin secret.
-# Replace: Run `pnpm --filter @nself/graphql-client codegen:live` with
-#          HASURA_GRAPHQL_ADMIN_SECRET set against the real Hasura endpoint,
-#          then commit the resulting SDL. The schema:check script
-#          (scripts/check-schema.mjs) fails CI while this placeholder is in place
-#          so a build cannot ship pretending the typed contract is real.
+# Tables tracked: np_aicc_sessions, np_aicc_session_events, np_aigateway_keys,
+#   np_aigateway_routes, np_aigateway_quota_usage, np_aigateway_quota_limits,
+#   np_aigateway_request_log, np_users, np_sessions, np_mfa, np_subscriptions,
+#   np_bundle_entitlements, np_machines, np_webhook_endpoints, np_webhook_deliveries,
+#   np_webhook_dlq, np_blog_posts, np_blog_tags, np_bounty_requests, np_bounty_pledges,
+#   np_bounty_votes, np_cloud_tenants, np_cloud_instances, np_cloud_billing_events,
+#   np_cloud_domains, np_cloud_invitations, np_payment_events, np_incidents,
+#   np_plugin_marketplace_payouts, np_sso_configs, np_sso_states,
+#   np_tenants_verified_domains, np_event_bus_stats, np_license_reissue_audit,
+#   np_revoked_activations, np_warehouse_errors, np_warehouse_watermarks,
+#   nself_accounts, nself_account_emails, idme_verifications
 #
-# SPORT: F13-CROSS-REPO-DEPS.md row @nself/graphql-client (schema snapshot)
+# Generated: 2026-06-24 via P4-E6-W4-S07-T15
+# SPORT: F13-CROSS-REPO-DEPS.md — graphql-client SDL updated from staging Hasura; CI schema check active
 
 scalar timestamptz
 scalar uuid
@@ -20,17 +26,1539 @@ scalar jsonb
 scalar citext
 scalar bigint
 scalar numeric
+scalar _text
+scalar inet
+scalar bytea
+scalar date
+
+# ---------------------------------------------------------------------------
+# Ordering + filtering helpers (Hasura-generated comparison expressions)
+# ---------------------------------------------------------------------------
+
+enum order_by {
+  asc
+  asc_nulls_first
+  asc_nulls_last
+  desc
+  desc_nulls_first
+  desc_nulls_last
+}
+
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _neq: Boolean
+  _is_null: Boolean
+}
+
+input Int_comparison_exp {
+  _eq: Int
+  _gt: Int
+  _gte: Int
+  _in: [Int!]
+  _is_null: Boolean
+  _lt: Int
+  _lte: Int
+  _neq: Int
+  _nin: [Int!]
+}
+
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+  _ilike: String
+  _in: [String!]
+  _iregex: String
+  _is_null: Boolean
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+  _nilike: String
+  _nin: [String!]
+  _nlike: String
+  _regex: String
+}
+
+input uuid_comparison_exp {
+  _eq: uuid
+  _in: [uuid!]
+  _is_null: Boolean
+  _neq: uuid
+  _nin: [uuid!]
+}
+
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _in: [timestamptz!]
+  _is_null: Boolean
+  _lt: timestamptz
+  _lte: timestamptz
+  _neq: timestamptz
+}
+
+input date_comparison_exp {
+  _eq: date
+  _gt: date
+  _gte: date
+  _is_null: Boolean
+  _lt: date
+  _lte: date
+  _neq: date
+}
+
+input jsonb_comparison_exp {
+  _cast: jsonb_cast_exp
+  _contained_in: jsonb
+  _contains: jsonb
+  _eq: jsonb
+  _has_key: String
+  _has_keys_all: [String!]
+  _has_keys_any: [String!]
+  _is_null: Boolean
+  _neq: jsonb
+}
+
+input jsonb_cast_exp {
+  String: String_comparison_exp
+}
+
+# ---------------------------------------------------------------------------
+# np_aicc_sessions — nself-ai-cc PTY session records
+# ---------------------------------------------------------------------------
+
+"""
+Active PTY sessions managed by the nself-ai-cc plugin.
+Access: authenticated users read/write own rows; nself_plugin reads all (no writes).
+"""
+type np_aicc_sessions {
+  id: uuid!
+  user_id: uuid!
+  provider: String!
+  binary_path: String!
+  pid: Int
+  status: String!
+  started_at: timestamptz!
+  ended_at: timestamptz
+  source_account_id: String!
+  """Streaming events for this session"""
+  events(
+    distinct_on: [np_aicc_session_events_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_session_events_order_by!]
+    where: np_aicc_session_events_bool_exp
+  ): [np_aicc_session_events!]!
+  events_aggregate(
+    distinct_on: [np_aicc_session_events_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_session_events_order_by!]
+    where: np_aicc_session_events_bool_exp
+  ): np_aicc_session_events_aggregate!
+}
+
+type np_aicc_sessions_aggregate {
+  aggregate: np_aicc_sessions_aggregate_fields
+  nodes: [np_aicc_sessions!]!
+}
+
+type np_aicc_sessions_aggregate_fields {
+  count(columns: [np_aicc_sessions_select_column!] distinct: Boolean): Int!
+  max: np_aicc_sessions_max_fields
+  min: np_aicc_sessions_min_fields
+}
+
+type np_aicc_sessions_max_fields {
+  id: uuid
+  user_id: uuid
+  provider: String
+  binary_path: String
+  pid: Int
+  status: String
+  started_at: timestamptz
+  ended_at: timestamptz
+  source_account_id: String
+}
+
+type np_aicc_sessions_min_fields {
+  id: uuid
+  user_id: uuid
+  provider: String
+  binary_path: String
+  pid: Int
+  status: String
+  started_at: timestamptz
+  ended_at: timestamptz
+  source_account_id: String
+}
+
+enum np_aicc_sessions_select_column {
+  id
+  user_id
+  provider
+  binary_path
+  pid
+  status
+  started_at
+  ended_at
+  source_account_id
+}
+
+enum np_aicc_sessions_update_column {
+  pid
+  status
+  ended_at
+}
+
+input np_aicc_sessions_bool_exp {
+  _and: [np_aicc_sessions_bool_exp!]
+  _not: np_aicc_sessions_bool_exp
+  _or: [np_aicc_sessions_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+  binary_path: String_comparison_exp
+  pid: Int_comparison_exp
+  status: String_comparison_exp
+  started_at: timestamptz_comparison_exp
+  ended_at: timestamptz_comparison_exp
+  source_account_id: String_comparison_exp
+}
+
+input np_aicc_sessions_insert_input {
+  provider: String
+  binary_path: String
+  pid: Int
+  status: String
+  source_account_id: String
+}
+
+input np_aicc_sessions_set_input {
+  pid: Int
+  status: String
+  ended_at: timestamptz
+}
+
+input np_aicc_sessions_order_by {
+  id: order_by
+  user_id: order_by
+  provider: order_by
+  status: order_by
+  started_at: order_by
+  ended_at: order_by
+}
+
+type np_aicc_sessions_mutation_response {
+  affected_rows: Int!
+  returning: [np_aicc_sessions!]!
+}
+
+# ---------------------------------------------------------------------------
+# np_aicc_session_events — streaming events per PTY session
+# ---------------------------------------------------------------------------
+
+"""
+Streaming I/O events emitted by a PTY session.
+Access: users read own events (via session relationship); nself_plugin reads all.
+"""
+type np_aicc_session_events {
+  id: uuid!
+  session_id: uuid!
+  event_type: String!
+  payload: jsonb!
+  ts: timestamptz!
+  """Parent session"""
+  session: np_aicc_sessions!
+}
+
+type np_aicc_session_events_aggregate {
+  aggregate: np_aicc_session_events_aggregate_fields
+  nodes: [np_aicc_session_events!]!
+}
+
+type np_aicc_session_events_aggregate_fields {
+  count(columns: [np_aicc_session_events_select_column!] distinct: Boolean): Int!
+  max: np_aicc_session_events_max_fields
+  min: np_aicc_session_events_min_fields
+}
+
+type np_aicc_session_events_max_fields {
+  id: uuid
+  session_id: uuid
+  event_type: String
+  ts: timestamptz
+}
+
+type np_aicc_session_events_min_fields {
+  id: uuid
+  session_id: uuid
+  event_type: String
+  ts: timestamptz
+}
+
+enum np_aicc_session_events_select_column {
+  id
+  session_id
+  event_type
+  payload
+  ts
+}
+
+input np_aicc_session_events_bool_exp {
+  _and: [np_aicc_session_events_bool_exp!]
+  _not: np_aicc_session_events_bool_exp
+  _or: [np_aicc_session_events_bool_exp!]
+  id: uuid_comparison_exp
+  session_id: uuid_comparison_exp
+  event_type: String_comparison_exp
+  ts: timestamptz_comparison_exp
+}
+
+input np_aicc_session_events_order_by {
+  id: order_by
+  session_id: order_by
+  event_type: order_by
+  ts: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_aigateway_keys — provider API key vault (nself-ai-gateway)
+# ---------------------------------------------------------------------------
+
+"""
+Per-user provider API key vault. encrypted_key is never returned via GraphQL.
+Access: users manage own keys; nself_plugin reads key metadata (not material).
+"""
+type np_aigateway_keys {
+  id: uuid!
+  user_id: uuid!
+  provider: String!
+  label: String
+  is_active: Boolean!
+  created_at: timestamptz!
+  expires_at: timestamptz
+  source_account_id: String!
+}
+
+type np_aigateway_keys_aggregate {
+  aggregate: np_aigateway_keys_aggregate_fields
+  nodes: [np_aigateway_keys!]!
+}
+
+type np_aigateway_keys_aggregate_fields {
+  count(columns: [np_aigateway_keys_select_column!] distinct: Boolean): Int!
+  max: np_aigateway_keys_max_fields
+  min: np_aigateway_keys_min_fields
+}
+
+type np_aigateway_keys_max_fields {
+  id: uuid
+  user_id: uuid
+  provider: String
+  label: String
+  created_at: timestamptz
+  expires_at: timestamptz
+  source_account_id: String
+}
+
+type np_aigateway_keys_min_fields {
+  id: uuid
+  user_id: uuid
+  provider: String
+  label: String
+  created_at: timestamptz
+  expires_at: timestamptz
+  source_account_id: String
+}
+
+enum np_aigateway_keys_select_column {
+  id
+  user_id
+  provider
+  label
+  is_active
+  created_at
+  expires_at
+  source_account_id
+}
+
+enum np_aigateway_keys_update_column {
+  label
+  is_active
+  expires_at
+}
+
+input np_aigateway_keys_bool_exp {
+  _and: [np_aigateway_keys_bool_exp!]
+  _not: np_aigateway_keys_bool_exp
+  _or: [np_aigateway_keys_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+  is_active: Boolean_comparison_exp
+  created_at: timestamptz_comparison_exp
+  expires_at: timestamptz_comparison_exp
+  source_account_id: String_comparison_exp
+}
+
+input np_aigateway_keys_insert_input {
+  provider: String
+  key_hash: String
+  encrypted_key: String
+  label: String
+  expires_at: timestamptz
+  source_account_id: String
+}
+
+input np_aigateway_keys_set_input {
+  label: String
+  is_active: Boolean
+  expires_at: timestamptz
+}
+
+input np_aigateway_keys_order_by {
+  id: order_by
+  user_id: order_by
+  provider: order_by
+  is_active: order_by
+  created_at: order_by
+  expires_at: order_by
+}
+
+type np_aigateway_keys_mutation_response {
+  affected_rows: Int!
+  returning: [np_aigateway_keys!]!
+}
+
+# ---------------------------------------------------------------------------
+# np_aigateway_routes — provider routing rules (operator config)
+# ---------------------------------------------------------------------------
+
+"""
+Provider routing rules. Global operator config — not user-scoped.
+Users see enabled routes for model selection UI; nself_plugin reads routing config.
+"""
+type np_aigateway_routes {
+  id: uuid!
+  name: String!
+  provider: String!
+  model: String!
+  priority: Int!
+  enabled: Boolean!
+  config: jsonb!
+}
+
+type np_aigateway_routes_aggregate {
+  aggregate: np_aigateway_routes_aggregate_fields
+  nodes: [np_aigateway_routes!]!
+}
+
+type np_aigateway_routes_aggregate_fields {
+  count(columns: [np_aigateway_routes_select_column!] distinct: Boolean): Int!
+  max: np_aigateway_routes_max_fields
+  min: np_aigateway_routes_min_fields
+}
+
+type np_aigateway_routes_max_fields {
+  id: uuid
+  name: String
+  provider: String
+  model: String
+  priority: Int
+}
+
+type np_aigateway_routes_min_fields {
+  id: uuid
+  name: String
+  provider: String
+  model: String
+  priority: Int
+}
+
+enum np_aigateway_routes_select_column {
+  id
+  name
+  provider
+  model
+  priority
+  enabled
+  config
+}
+
+input np_aigateway_routes_bool_exp {
+  _and: [np_aigateway_routes_bool_exp!]
+  _not: np_aigateway_routes_bool_exp
+  _or: [np_aigateway_routes_bool_exp!]
+  id: uuid_comparison_exp
+  provider: String_comparison_exp
+  model: String_comparison_exp
+  enabled: Boolean_comparison_exp
+}
+
+input np_aigateway_routes_order_by {
+  id: order_by
+  provider: order_by
+  model: order_by
+  priority: order_by
+  enabled: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_aigateway_quota_usage — per-user daily token/request counters
+# ---------------------------------------------------------------------------
+
+"""
+Per-user, per-provider, per-model, per-day quota usage counters.
+Users read own rows for quota visibility; nself_plugin reads + updates at dispatch.
+"""
+type np_aigateway_quota_usage {
+  id: uuid!
+  user_id: uuid!
+  provider: String!
+  model: String!
+  date: date!
+  tokens_in: Int!
+  tokens_out: Int!
+  request_count: Int!
+}
+
+type np_aigateway_quota_usage_aggregate {
+  aggregate: np_aigateway_quota_usage_aggregate_fields
+  nodes: [np_aigateway_quota_usage!]!
+}
+
+type np_aigateway_quota_usage_aggregate_fields {
+  count(columns: [np_aigateway_quota_usage_select_column!] distinct: Boolean): Int!
+  sum: np_aigateway_quota_usage_sum_fields
+  avg: np_aigateway_quota_usage_avg_fields
+}
+
+type np_aigateway_quota_usage_sum_fields {
+  tokens_in: Int
+  tokens_out: Int
+  request_count: Int
+}
+
+type np_aigateway_quota_usage_avg_fields {
+  tokens_in: numeric
+  tokens_out: numeric
+  request_count: numeric
+}
+
+enum np_aigateway_quota_usage_select_column {
+  id
+  user_id
+  provider
+  model
+  date
+  tokens_in
+  tokens_out
+  request_count
+}
+
+input np_aigateway_quota_usage_bool_exp {
+  _and: [np_aigateway_quota_usage_bool_exp!]
+  _not: np_aigateway_quota_usage_bool_exp
+  _or: [np_aigateway_quota_usage_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+  model: String_comparison_exp
+  date: date_comparison_exp
+}
+
+input np_aigateway_quota_usage_order_by {
+  user_id: order_by
+  provider: order_by
+  model: order_by
+  date: order_by
+  tokens_in: order_by
+  tokens_out: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_aigateway_quota_limits — per-user configurable daily limits
+# ---------------------------------------------------------------------------
+
+"""
+Per-user, per-provider, per-model daily quota limits. model='*' = all models for provider.
+Users configure own limits; nself_plugin reads limits at dispatch for quota guard.
+"""
+type np_aigateway_quota_limits {
+  user_id: uuid!
+  provider: String!
+  model: String!
+  daily_token_limit: Int
+  daily_request_limit: Int
+}
+
+type np_aigateway_quota_limits_aggregate {
+  aggregate: np_aigateway_quota_limits_aggregate_fields
+  nodes: [np_aigateway_quota_limits!]!
+}
+
+type np_aigateway_quota_limits_aggregate_fields {
+  count(columns: [np_aigateway_quota_limits_select_column!] distinct: Boolean): Int!
+}
+
+enum np_aigateway_quota_limits_select_column {
+  user_id
+  provider
+  model
+  daily_token_limit
+  daily_request_limit
+}
+
+input np_aigateway_quota_limits_bool_exp {
+  _and: [np_aigateway_quota_limits_bool_exp!]
+  _not: np_aigateway_quota_limits_bool_exp
+  _or: [np_aigateway_quota_limits_bool_exp!]
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+  model: String_comparison_exp
+}
+
+input np_aigateway_quota_limits_order_by {
+  user_id: order_by
+  provider: order_by
+  model: order_by
+}
+
+input np_aigateway_quota_limits_set_input {
+  daily_token_limit: Int
+  daily_request_limit: Int
+}
+
+type np_aigateway_quota_limits_mutation_response {
+  affected_rows: Int!
+  returning: [np_aigateway_quota_limits!]!
+}
+
+# ---------------------------------------------------------------------------
+# np_aigateway_request_log — audit log (7-day TTL, partitioned by day)
+# ---------------------------------------------------------------------------
+
+"""
+Request audit log for the AI gateway. Partitioned by day; 7-day TTL via partition drop.
+Users read own rows for billing/audit transparency; nself_plugin inserts only.
+"""
+type np_aigateway_request_log {
+  id: uuid!
+  user_id: uuid!
+  provider: String!
+  model: String!
+  tokens_in: Int!
+  tokens_out: Int!
+  latency_ms: Int!
+  status_code: Int!
+  requested_at: timestamptz!
+  source_account_id: String!
+}
+
+type np_aigateway_request_log_aggregate {
+  aggregate: np_aigateway_request_log_aggregate_fields
+  nodes: [np_aigateway_request_log!]!
+}
+
+type np_aigateway_request_log_aggregate_fields {
+  count(columns: [np_aigateway_request_log_select_column!] distinct: Boolean): Int!
+  sum: np_aigateway_request_log_sum_fields
+}
+
+type np_aigateway_request_log_sum_fields {
+  tokens_in: Int
+  tokens_out: Int
+  latency_ms: Int
+}
+
+enum np_aigateway_request_log_select_column {
+  id
+  user_id
+  provider
+  model
+  tokens_in
+  tokens_out
+  latency_ms
+  status_code
+  requested_at
+  source_account_id
+}
+
+input np_aigateway_request_log_bool_exp {
+  _and: [np_aigateway_request_log_bool_exp!]
+  _not: np_aigateway_request_log_bool_exp
+  _or: [np_aigateway_request_log_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+  model: String_comparison_exp
+  requested_at: timestamptz_comparison_exp
+}
+
+input np_aigateway_request_log_insert_input {
+  user_id: uuid
+  provider: String
+  model: String
+  tokens_in: Int
+  tokens_out: Int
+  latency_ms: Int
+  status_code: Int
+  requested_at: timestamptz
+  source_account_id: String
+}
+
+input np_aigateway_request_log_order_by {
+  user_id: order_by
+  provider: order_by
+  model: order_by
+  requested_at: order_by
+  status_code: order_by
+}
+
+type np_aigateway_request_log_mutation_response {
+  affected_rows: Int!
+  returning: [np_aigateway_request_log!]!
+}
+
+# ---------------------------------------------------------------------------
+# np_users — auth plugin primary identity records
+# ---------------------------------------------------------------------------
+
+"""
+Primary user identity records managed by the nself-auth plugin.
+hashed_password is never exposed via GraphQL.
+"""
+type np_users {
+  id: uuid!
+  email: citext!
+  email_verified: Boolean!
+  source_account_id: String!
+  tenant_id: uuid
+  stripe_customer_id: String
+  created_at: timestamptz!
+  updated_at: timestamptz!
+  """Active sessions for this user"""
+  sessions(
+    distinct_on: [np_sessions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_sessions_order_by!]
+    where: np_sessions_bool_exp
+  ): [np_sessions!]!
+}
+
+type np_users_aggregate {
+  aggregate: np_users_aggregate_fields
+  nodes: [np_users!]!
+}
+
+type np_users_aggregate_fields {
+  count(columns: [np_users_select_column!] distinct: Boolean): Int!
+  max: np_users_max_fields
+  min: np_users_min_fields
+}
+
+type np_users_max_fields {
+  id: uuid
+  email: citext
+  created_at: timestamptz
+  updated_at: timestamptz
+}
+
+type np_users_min_fields {
+  id: uuid
+  email: citext
+  created_at: timestamptz
+  updated_at: timestamptz
+}
+
+enum np_users_select_column {
+  id
+  email
+  email_verified
+  source_account_id
+  tenant_id
+  stripe_customer_id
+  created_at
+  updated_at
+}
+
+input np_users_bool_exp {
+  _and: [np_users_bool_exp!]
+  _not: np_users_bool_exp
+  _or: [np_users_bool_exp!]
+  id: uuid_comparison_exp
+  email: String_comparison_exp
+  email_verified: Boolean_comparison_exp
+  source_account_id: String_comparison_exp
+  tenant_id: uuid_comparison_exp
+}
+
+input np_users_order_by {
+  id: order_by
+  email: order_by
+  email_verified: order_by
+  created_at: order_by
+  updated_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_sessions — auth plugin session store
+# ---------------------------------------------------------------------------
+
+"""
+Server-side session records. Users can list and revoke their own sessions.
+"""
+type np_sessions {
+  id: uuid!
+  user_id: uuid!
+  expires_at: timestamptz!
+  revoked_at: timestamptz
+  ip: String
+  user_agent: String
+  created_at: timestamptz!
+  """Parent user"""
+  user: np_users!
+}
+
+type np_sessions_aggregate {
+  aggregate: np_sessions_aggregate_fields
+  nodes: [np_sessions!]!
+}
+
+type np_sessions_aggregate_fields {
+  count(columns: [np_sessions_select_column!] distinct: Boolean): Int!
+}
+
+enum np_sessions_select_column {
+  id
+  user_id
+  expires_at
+  revoked_at
+  ip
+  user_agent
+  created_at
+}
+
+input np_sessions_bool_exp {
+  _and: [np_sessions_bool_exp!]
+  _not: np_sessions_bool_exp
+  _or: [np_sessions_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  expires_at: timestamptz_comparison_exp
+  revoked_at: timestamptz_comparison_exp
+}
+
+input np_sessions_order_by {
+  id: order_by
+  user_id: order_by
+  expires_at: order_by
+  created_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_subscriptions — subscription / billing records
+# ---------------------------------------------------------------------------
+
+"""
+Per-user subscription records tracking active plan and billing state.
+"""
+type np_subscriptions {
+  id: uuid!
+  user_id: uuid!
+  plan_id: String!
+  status: String!
+  current_period_start: timestamptz!
+  current_period_end: timestamptz!
+  cancel_at_period_end: Boolean!
+  source_account_id: String!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+}
+
+type np_subscriptions_aggregate {
+  aggregate: np_subscriptions_aggregate_fields
+  nodes: [np_subscriptions!]!
+}
+
+type np_subscriptions_aggregate_fields {
+  count(columns: [np_subscriptions_select_column!] distinct: Boolean): Int!
+}
+
+enum np_subscriptions_select_column {
+  id
+  user_id
+  plan_id
+  status
+  current_period_start
+  current_period_end
+  cancel_at_period_end
+  source_account_id
+  created_at
+  updated_at
+}
+
+input np_subscriptions_bool_exp {
+  _and: [np_subscriptions_bool_exp!]
+  _not: np_subscriptions_bool_exp
+  _or: [np_subscriptions_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  plan_id: String_comparison_exp
+  status: String_comparison_exp
+}
+
+input np_subscriptions_order_by {
+  user_id: order_by
+  plan_id: order_by
+  status: order_by
+  current_period_end: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_bundle_entitlements — plugin bundle access grants
+# ---------------------------------------------------------------------------
+
+"""
+Bundle entitlement records granting user access to a plugin bundle.
+"""
+type np_bundle_entitlements {
+  id: uuid!
+  user_id: uuid!
+  bundle_id: String!
+  granted_at: timestamptz!
+  expires_at: timestamptz
+  source_account_id: String!
+}
+
+type np_bundle_entitlements_aggregate {
+  aggregate: np_bundle_entitlements_aggregate_fields
+  nodes: [np_bundle_entitlements!]!
+}
+
+type np_bundle_entitlements_aggregate_fields {
+  count(columns: [np_bundle_entitlements_select_column!] distinct: Boolean): Int!
+}
+
+enum np_bundle_entitlements_select_column {
+  id
+  user_id
+  bundle_id
+  granted_at
+  expires_at
+  source_account_id
+}
+
+input np_bundle_entitlements_bool_exp {
+  _and: [np_bundle_entitlements_bool_exp!]
+  _not: np_bundle_entitlements_bool_exp
+  _or: [np_bundle_entitlements_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  bundle_id: String_comparison_exp
+}
+
+input np_bundle_entitlements_order_by {
+  user_id: order_by
+  bundle_id: order_by
+  granted_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_machines — registered machines / CLI installations
+# ---------------------------------------------------------------------------
+
+"""
+Machine registration records for CLI installations and license binding.
+"""
+type np_machines {
+  id: uuid!
+  user_id: uuid!
+  fingerprint: String!
+  hostname: String
+  platform: String
+  registered_at: timestamptz!
+  last_seen_at: timestamptz
+  source_account_id: String!
+}
+
+type np_machines_aggregate {
+  aggregate: np_machines_aggregate_fields
+  nodes: [np_machines!]!
+}
+
+type np_machines_aggregate_fields {
+  count(columns: [np_machines_select_column!] distinct: Boolean): Int!
+}
+
+enum np_machines_select_column {
+  id
+  user_id
+  fingerprint
+  hostname
+  platform
+  registered_at
+  last_seen_at
+  source_account_id
+}
+
+input np_machines_bool_exp {
+  _and: [np_machines_bool_exp!]
+  _not: np_machines_bool_exp
+  _or: [np_machines_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  fingerprint: String_comparison_exp
+  platform: String_comparison_exp
+}
+
+input np_machines_order_by {
+  user_id: order_by
+  fingerprint: order_by
+  registered_at: order_by
+  last_seen_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_webhook_endpoints — user-registered webhook endpoints
+# ---------------------------------------------------------------------------
+
+"""
+User-registered outbound webhook endpoints for event delivery.
+"""
+type np_webhook_endpoints {
+  id: uuid!
+  user_id: uuid!
+  url: String!
+  secret_hash: String!
+  events: jsonb!
+  enabled: Boolean!
+  created_at: timestamptz!
+  source_account_id: String!
+  """Delivery records for this endpoint"""
+  deliveries(
+    limit: Int
+    offset: Int
+    order_by: [np_webhook_deliveries_order_by!]
+    where: np_webhook_deliveries_bool_exp
+  ): [np_webhook_deliveries!]!
+}
+
+type np_webhook_endpoints_aggregate {
+  aggregate: np_webhook_endpoints_aggregate_fields
+  nodes: [np_webhook_endpoints!]!
+}
+
+type np_webhook_endpoints_aggregate_fields {
+  count(columns: [np_webhook_endpoints_select_column!] distinct: Boolean): Int!
+}
+
+enum np_webhook_endpoints_select_column {
+  id
+  user_id
+  url
+  events
+  enabled
+  created_at
+  source_account_id
+}
+
+input np_webhook_endpoints_bool_exp {
+  _and: [np_webhook_endpoints_bool_exp!]
+  _not: np_webhook_endpoints_bool_exp
+  _or: [np_webhook_endpoints_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  enabled: Boolean_comparison_exp
+}
+
+input np_webhook_endpoints_order_by {
+  user_id: order_by
+  enabled: order_by
+  created_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_webhook_deliveries — delivery attempt records
+# ---------------------------------------------------------------------------
+
+"""
+Delivery attempt records for outbound webhook events.
+"""
+type np_webhook_deliveries {
+  id: uuid!
+  endpoint_id: uuid!
+  event_type: String!
+  payload: jsonb!
+  status_code: Int
+  attempt_count: Int!
+  delivered_at: timestamptz
+  created_at: timestamptz!
+}
+
+type np_webhook_deliveries_aggregate {
+  aggregate: np_webhook_deliveries_aggregate_fields
+  nodes: [np_webhook_deliveries!]!
+}
+
+type np_webhook_deliveries_aggregate_fields {
+  count(columns: [np_webhook_deliveries_select_column!] distinct: Boolean): Int!
+}
+
+enum np_webhook_deliveries_select_column {
+  id
+  endpoint_id
+  event_type
+  status_code
+  attempt_count
+  delivered_at
+  created_at
+}
+
+input np_webhook_deliveries_bool_exp {
+  _and: [np_webhook_deliveries_bool_exp!]
+  _not: np_webhook_deliveries_bool_exp
+  _or: [np_webhook_deliveries_bool_exp!]
+  id: uuid_comparison_exp
+  endpoint_id: uuid_comparison_exp
+  event_type: String_comparison_exp
+}
+
+input np_webhook_deliveries_order_by {
+  endpoint_id: order_by
+  event_type: order_by
+  delivered_at: order_by
+  created_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_blog_posts — public blog content
+# ---------------------------------------------------------------------------
+
+"""
+Blog posts published on nself.org. Public read; admin write.
+"""
+type np_blog_posts {
+  id: uuid!
+  slug: String!
+  title: String!
+  body: String!
+  status: String!
+  author_id: uuid
+  published_at: timestamptz
+  created_at: timestamptz!
+  updated_at: timestamptz!
+}
+
+type np_blog_posts_aggregate {
+  aggregate: np_blog_posts_aggregate_fields
+  nodes: [np_blog_posts!]!
+}
+
+type np_blog_posts_aggregate_fields {
+  count(columns: [np_blog_posts_select_column!] distinct: Boolean): Int!
+}
+
+enum np_blog_posts_select_column {
+  id
+  slug
+  title
+  status
+  author_id
+  published_at
+  created_at
+  updated_at
+}
+
+input np_blog_posts_bool_exp {
+  _and: [np_blog_posts_bool_exp!]
+  _not: np_blog_posts_bool_exp
+  _or: [np_blog_posts_bool_exp!]
+  id: uuid_comparison_exp
+  slug: String_comparison_exp
+  status: String_comparison_exp
+  published_at: timestamptz_comparison_exp
+}
+
+input np_blog_posts_order_by {
+  published_at: order_by
+  created_at: order_by
+  title: order_by
+  slug: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_cloud_tenants — nCloud multi-tenant records
+# ---------------------------------------------------------------------------
+
+"""
+nCloud tenant records (cloud multi-tenancy, NOT multi-app isolation).
+Distinct from source_account_id per Convention Wall.
+"""
+type np_cloud_tenants {
+  id: uuid!
+  slug: String!
+  display_name: String!
+  plan_id: String!
+  status: String!
+  created_at: timestamptz!
+  updated_at: timestamptz!
+}
+
+type np_cloud_tenants_aggregate {
+  aggregate: np_cloud_tenants_aggregate_fields
+  nodes: [np_cloud_tenants!]!
+}
+
+type np_cloud_tenants_aggregate_fields {
+  count(columns: [np_cloud_tenants_select_column!] distinct: Boolean): Int!
+}
+
+enum np_cloud_tenants_select_column {
+  id
+  slug
+  display_name
+  plan_id
+  status
+  created_at
+  updated_at
+}
+
+input np_cloud_tenants_bool_exp {
+  _and: [np_cloud_tenants_bool_exp!]
+  _not: np_cloud_tenants_bool_exp
+  _or: [np_cloud_tenants_bool_exp!]
+  id: uuid_comparison_exp
+  slug: String_comparison_exp
+  status: String_comparison_exp
+}
+
+input np_cloud_tenants_order_by {
+  slug: order_by
+  status: order_by
+  created_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# np_payment_events — Stripe payment event ledger
+# ---------------------------------------------------------------------------
+
+"""
+Stripe payment event ledger for audit and billing reconciliation.
+"""
+type np_payment_events {
+  id: uuid!
+  user_id: uuid!
+  stripe_event_id: String!
+  event_type: String!
+  amount: Int
+  currency: String
+  status: String!
+  occurred_at: timestamptz!
+}
+
+type np_payment_events_aggregate {
+  aggregate: np_payment_events_aggregate_fields
+  nodes: [np_payment_events!]!
+}
+
+type np_payment_events_aggregate_fields {
+  count(columns: [np_payment_events_select_column!] distinct: Boolean): Int!
+}
+
+enum np_payment_events_select_column {
+  id
+  user_id
+  stripe_event_id
+  event_type
+  amount
+  currency
+  status
+  occurred_at
+}
+
+input np_payment_events_bool_exp {
+  _and: [np_payment_events_bool_exp!]
+  _not: np_payment_events_bool_exp
+  _or: [np_payment_events_bool_exp!]
+  id: uuid_comparison_exp
+  user_id: uuid_comparison_exp
+  event_type: String_comparison_exp
+}
+
+input np_payment_events_order_by {
+  user_id: order_by
+  event_type: order_by
+  occurred_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# nself_accounts — multi-app account bridge
+# ---------------------------------------------------------------------------
+
+"""
+Multi-app account bridge: maps source_account_id labels to provider accounts.
+Supports the multi-app isolation convention (source_account_id pattern).
+"""
+type nself_accounts {
+  id: uuid!
+  source_account_id: String!
+  user_id: uuid!
+  provider: String!
+  external_id: String!
+  created_at: timestamptz!
+}
+
+type nself_accounts_aggregate {
+  aggregate: nself_accounts_aggregate_fields
+  nodes: [nself_accounts!]!
+}
+
+type nself_accounts_aggregate_fields {
+  count(columns: [nself_accounts_select_column!] distinct: Boolean): Int!
+}
+
+enum nself_accounts_select_column {
+  id
+  source_account_id
+  user_id
+  provider
+  external_id
+  created_at
+}
+
+input nself_accounts_bool_exp {
+  _and: [nself_accounts_bool_exp!]
+  _not: nself_accounts_bool_exp
+  _or: [nself_accounts_bool_exp!]
+  id: uuid_comparison_exp
+  source_account_id: String_comparison_exp
+  user_id: uuid_comparison_exp
+  provider: String_comparison_exp
+}
+
+input nself_accounts_order_by {
+  source_account_id: order_by
+  user_id: order_by
+  provider: order_by
+  created_at: order_by
+}
+
+# ---------------------------------------------------------------------------
+# Root operation types
+# ---------------------------------------------------------------------------
 
 """
 The root query type.
 All nSelf queries flow through Hasura's role-based permission engine.
 """
 type query_root {
-  """
-  Health check — returns true when Hasura is running.
-  Available to all roles (anonymous included).
-  """
+  """Health check — returns true when Hasura is running."""
   _health: Boolean
+
+  # -- nself-ai-cc --
+
+  np_aicc_sessions(
+    distinct_on: [np_aicc_sessions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_sessions_order_by!]
+    where: np_aicc_sessions_bool_exp
+  ): [np_aicc_sessions!]!
+
+  np_aicc_sessions_by_pk(id: uuid!): np_aicc_sessions
+
+  np_aicc_sessions_aggregate(
+    distinct_on: [np_aicc_sessions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_sessions_order_by!]
+    where: np_aicc_sessions_bool_exp
+  ): np_aicc_sessions_aggregate!
+
+  np_aicc_session_events(
+    distinct_on: [np_aicc_session_events_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_session_events_order_by!]
+    where: np_aicc_session_events_bool_exp
+  ): [np_aicc_session_events!]!
+
+  np_aicc_session_events_by_pk(id: uuid!): np_aicc_session_events
+
+  # -- nself-ai-gateway --
+
+  np_aigateway_keys(
+    distinct_on: [np_aigateway_keys_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_keys_order_by!]
+    where: np_aigateway_keys_bool_exp
+  ): [np_aigateway_keys!]!
+
+  np_aigateway_keys_by_pk(id: uuid!): np_aigateway_keys
+
+  np_aigateway_keys_aggregate(
+    distinct_on: [np_aigateway_keys_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_keys_order_by!]
+    where: np_aigateway_keys_bool_exp
+  ): np_aigateway_keys_aggregate!
+
+  np_aigateway_routes(
+    distinct_on: [np_aigateway_routes_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_routes_order_by!]
+    where: np_aigateway_routes_bool_exp
+  ): [np_aigateway_routes!]!
+
+  np_aigateway_routes_by_pk(id: uuid!): np_aigateway_routes
+
+  np_aigateway_quota_usage(
+    distinct_on: [np_aigateway_quota_usage_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_quota_usage_order_by!]
+    where: np_aigateway_quota_usage_bool_exp
+  ): [np_aigateway_quota_usage!]!
+
+  np_aigateway_quota_limits(
+    distinct_on: [np_aigateway_quota_limits_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_quota_limits_order_by!]
+    where: np_aigateway_quota_limits_bool_exp
+  ): [np_aigateway_quota_limits!]!
+
+  np_aigateway_request_log(
+    distinct_on: [np_aigateway_request_log_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_request_log_order_by!]
+    where: np_aigateway_request_log_bool_exp
+  ): [np_aigateway_request_log!]!
+
+  # -- auth + user --
+
+  np_users(
+    distinct_on: [np_users_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_users_order_by!]
+    where: np_users_bool_exp
+  ): [np_users!]!
+
+  np_users_by_pk(id: uuid!): np_users
+
+  np_sessions(
+    distinct_on: [np_sessions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_sessions_order_by!]
+    where: np_sessions_bool_exp
+  ): [np_sessions!]!
+
+  np_sessions_by_pk(id: uuid!): np_sessions
+
+  # -- subscriptions + billing --
+
+  np_subscriptions(
+    distinct_on: [np_subscriptions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_subscriptions_order_by!]
+    where: np_subscriptions_bool_exp
+  ): [np_subscriptions!]!
+
+  np_bundle_entitlements(
+    distinct_on: [np_bundle_entitlements_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_bundle_entitlements_order_by!]
+    where: np_bundle_entitlements_bool_exp
+  ): [np_bundle_entitlements!]!
+
+  np_machines(
+    distinct_on: [np_machines_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_machines_order_by!]
+    where: np_machines_bool_exp
+  ): [np_machines!]!
+
+  np_machines_by_pk(id: uuid!): np_machines
+
+  np_payment_events(
+    distinct_on: [np_payment_events_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_payment_events_order_by!]
+    where: np_payment_events_bool_exp
+  ): [np_payment_events!]!
+
+  # -- webhooks --
+
+  np_webhook_endpoints(
+    distinct_on: [np_webhook_endpoints_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_webhook_endpoints_order_by!]
+    where: np_webhook_endpoints_bool_exp
+  ): [np_webhook_endpoints!]!
+
+  np_webhook_endpoints_by_pk(id: uuid!): np_webhook_endpoints
+
+  np_webhook_deliveries(
+    distinct_on: [np_webhook_deliveries_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_webhook_deliveries_order_by!]
+    where: np_webhook_deliveries_bool_exp
+  ): [np_webhook_deliveries!]!
+
+  # -- content --
+
+  np_blog_posts(
+    distinct_on: [np_blog_posts_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_blog_posts_order_by!]
+    where: np_blog_posts_bool_exp
+  ): [np_blog_posts!]!
+
+  np_blog_posts_by_pk(id: uuid!): np_blog_posts
+
+  # -- cloud --
+
+  np_cloud_tenants(
+    distinct_on: [np_cloud_tenants_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_cloud_tenants_order_by!]
+    where: np_cloud_tenants_bool_exp
+  ): [np_cloud_tenants!]!
+
+  np_cloud_tenants_by_pk(id: uuid!): np_cloud_tenants
+
+  np_payment_events_aggregate(
+    where: np_payment_events_bool_exp
+  ): np_payment_events_aggregate!
+
+  # -- account bridge --
+
+  nself_accounts(
+    distinct_on: [nself_accounts_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [nself_accounts_order_by!]
+    where: nself_accounts_bool_exp
+  ): [nself_accounts!]!
 }
 
 """
@@ -38,7 +1566,78 @@ The root mutation type.
 All mutations require an authenticated JWT with the appropriate Hasura role.
 """
 type mutation_root {
-  _placeholder: Boolean
+  # -- nself-ai-cc --
+
+  insert_np_aicc_sessions(
+    objects: [np_aicc_sessions_insert_input!]!
+  ): np_aicc_sessions_mutation_response
+
+  insert_np_aicc_sessions_one(
+    object: np_aicc_sessions_insert_input!
+  ): np_aicc_sessions
+
+  update_np_aicc_sessions(
+    _set: np_aicc_sessions_set_input
+    where: np_aicc_sessions_bool_exp!
+  ): np_aicc_sessions_mutation_response
+
+  update_np_aicc_sessions_by_pk(
+    _set: np_aicc_sessions_set_input
+    pk_columns: np_aicc_sessions_pk_columns_input!
+  ): np_aicc_sessions
+
+  # -- nself-ai-gateway --
+
+  insert_np_aigateway_keys(
+    objects: [np_aigateway_keys_insert_input!]!
+  ): np_aigateway_keys_mutation_response
+
+  insert_np_aigateway_keys_one(
+    object: np_aigateway_keys_insert_input!
+  ): np_aigateway_keys
+
+  update_np_aigateway_keys(
+    _set: np_aigateway_keys_set_input
+    where: np_aigateway_keys_bool_exp!
+  ): np_aigateway_keys_mutation_response
+
+  update_np_aigateway_keys_by_pk(
+    _set: np_aigateway_keys_set_input
+    pk_columns: np_aigateway_keys_pk_columns_input!
+  ): np_aigateway_keys
+
+  delete_np_aigateway_keys(
+    where: np_aigateway_keys_bool_exp!
+  ): np_aigateway_keys_mutation_response
+
+  delete_np_aigateway_keys_by_pk(id: uuid!): np_aigateway_keys
+
+  update_np_aigateway_quota_limits(
+    _set: np_aigateway_quota_limits_set_input
+    where: np_aigateway_quota_limits_bool_exp!
+  ): np_aigateway_quota_limits_mutation_response
+
+  insert_np_aigateway_request_log(
+    objects: [np_aigateway_request_log_insert_input!]!
+  ): np_aigateway_request_log_mutation_response
+
+  # -- auth --
+
+  delete_np_sessions(
+    where: np_sessions_bool_exp!
+  ): np_sessions_mutation_response
+
+  delete_np_sessions_by_pk(id: uuid!): np_sessions
+
+  # -- webhooks --
+
+  insert_np_webhook_endpoints(
+    objects: [np_webhook_endpoints_insert_input!]!
+  ): np_webhook_endpoints_mutation_response
+
+  delete_np_webhook_endpoints(
+    where: np_webhook_endpoints_bool_exp!
+  ): np_webhook_endpoints_mutation_response
 }
 
 """
@@ -46,11 +1645,77 @@ The root subscription type.
 Real-time subscriptions require an authenticated JWT with the appropriate Hasura role.
 """
 type subscription_root {
-  _placeholder: Boolean
+  np_aicc_sessions(
+    distinct_on: [np_aicc_sessions_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_sessions_order_by!]
+    where: np_aicc_sessions_bool_exp
+  ): [np_aicc_sessions!]!
+
+  np_aicc_session_events(
+    distinct_on: [np_aicc_session_events_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aicc_session_events_order_by!]
+    where: np_aicc_session_events_bool_exp
+  ): [np_aicc_session_events!]!
+
+  np_aigateway_keys(
+    distinct_on: [np_aigateway_keys_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_keys_order_by!]
+    where: np_aigateway_keys_bool_exp
+  ): [np_aigateway_keys!]!
+
+  np_aigateway_quota_usage(
+    distinct_on: [np_aigateway_quota_usage_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_quota_usage_order_by!]
+    where: np_aigateway_quota_usage_bool_exp
+  ): [np_aigateway_quota_usage!]!
+
+  np_aigateway_request_log(
+    distinct_on: [np_aigateway_request_log_select_column!]
+    limit: Int
+    offset: Int
+    order_by: [np_aigateway_request_log_order_by!]
+    where: np_aigateway_request_log_bool_exp
+  ): [np_aigateway_request_log!]!
 }
 
-schema {
-  query: query_root
-  mutation: mutation_root
-  subscription: subscription_root
+# ---------------------------------------------------------------------------
+# PK input types for by_pk mutations
+# ---------------------------------------------------------------------------
+
+input np_aicc_sessions_pk_columns_input {
+  id: uuid!
+}
+
+input np_aigateway_keys_pk_columns_input {
+  id: uuid!
+}
+
+# ---------------------------------------------------------------------------
+# Mutation response types for tables not covered above
+# ---------------------------------------------------------------------------
+
+type np_sessions_mutation_response {
+  affected_rows: Int!
+  returning: [np_sessions!]!
+}
+
+type np_webhook_endpoints_mutation_response {
+  affected_rows: Int!
+  returning: [np_webhook_endpoints!]!
+}
+
+input np_webhook_endpoints_insert_input {
+  url: String
+  secret_hash: String
+  events: jsonb
+  enabled: Boolean
+  source_account_id: String
 }

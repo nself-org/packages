@@ -17,6 +17,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Dependency audit
+        # P4-E5-W3-S05-T17: audit HIGH/CRITICAL advisories; fail on findings.
+        run: pnpm audit --audit-level=high
+
       - name: Typecheck
         run: pnpm typecheck
 
@@ -31,4 +35,10 @@ jobs:
         env:
           HASURA_GRAPHQL_URL: ${{ secrets.HASURA_GRAPHQL_URL }}
           HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
+        # continue-on-error is intentionally absent — CI-CD-100%-green Hard Rule
+
+      - name: Schema check (verify SDL is not placeholder)
+        run: pnpm --filter @nself/graphql-client schema:check
+        # Fails if src/codegen/schema.graphql is still the hand-written placeholder skeleton.
+        # A real SDL must be committed before any release ships (E6 gate).
         # continue-on-error is intentionally absent — CI-CD-100%-green Hard Rule
