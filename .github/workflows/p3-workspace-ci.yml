@@ -17,6 +17,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Dependency audit
+        # P4-E5-W3-S05-T17: audit HIGH/CRITICAL advisories; fail on findings.
+        run: pnpm audit --audit-level=high
+
       - name: Typecheck
         run: pnpm typecheck
 
