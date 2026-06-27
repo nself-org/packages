@@ -30,7 +30,8 @@
       "@nself/i18n": ["./@nself/i18n/src/index.ts"],
       "@nself/config": ["./@nself/config/src/index.ts"],
       "@nself/types": ["./@nself/types/src/index.ts"],
-      "@nself/offline-queue": ["./@nself/offline-queue/src/index.ts"]
+      "@nself/offline-queue": ["./@nself/offline-queue/src/index.ts"],
+      "@nself/ntask-core": ["./@nself/ntask-core/src/index.ts"]
     }
   },
   "include": ["@nself/**/*.ts", "@nself/**/*.tsx"],
