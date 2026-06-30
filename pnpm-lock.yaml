@@ -329,12 +329,6 @@ importers:
       clsx:
         specifier: ^2
         version: 2.1.1
-      react:
-        specifier: 19.0.0
-        version: 19.0.0
-      react-dom:
-        specifier: 19.0.0
-        version: 19.0.0(react@19.0.0)
       tailwind-merge:
         specifier: ^2
         version: 2.6.1
@@ -381,6 +375,12 @@ importers:
       jsdom:
         specifier: ^25
         version: 25.0.1
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
       storybook:
         specifier: ^8
         version: 8.6.18
@@ -8065,9 +8065,7 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
     optional: true
 
   '@react-native/normalize-colors@0.85.3': {}

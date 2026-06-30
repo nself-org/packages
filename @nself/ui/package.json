@@ -1,7 +1,7 @@
 {
   "name": "@nself/ui",
   "version": "0.1.0",
-  "description": "nSelf shared design system — AsyncScreen 7-state wrapper, shadcn/Radix primitives, nSelf Tailwind preset",
+  "description": "nSelf shared design system \u2014 AsyncScreen 7-state wrapper, shadcn/Radix primitives, nSelf Tailwind preset",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
@@ -54,6 +54,8 @@
     "jsdom": "^25",
     "tsup": "^8",
     "typescript": "^6.0.3",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   }
 }
