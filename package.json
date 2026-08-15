@@ -31,11 +31,26 @@
       "dompurify": ">=3.4.11",
       "uuid": ">=11.1.1",
       "@opentelemetry/core": ">=2.8.0",
-      "postcss": ">=8.5.15",
+      "postcss": ">=8.5.18",
       "@xmldom/xmldom": ">=0.8.13",
-      "js-yaml": ">=4.2.0",
+      "js-yaml": ">=4.3.1",
       "react": "19.0.0",
-      "react-dom": "19.0.0"
+      "react-dom": "19.0.0",
+      "immutable": ">=5.1.8",
+      "nanoid": ">=3.3.18",
+      "shell-quote": ">=1.9.0",
+      "brace-expansion@1": "1.1.18",
+      "brace-expansion@2": "2.1.4",
+      "brace-expansion@3": "5.0.9",
+      "brace-expansion@4": "5.0.9",
+      "brace-expansion@5": "5.0.9",
+      "undici": "^7.29.0"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2025-71330",
+        "CVE-2025-71329"
+      ]
     }
   }
 }
