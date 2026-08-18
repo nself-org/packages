@@ -1,0 +1,12 @@
+src/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+tsconfig*.json
+tsup.config.ts
+vitest.config.*
+.storybook/
+.env*
+*.stories.tsx
+*.stories.ts

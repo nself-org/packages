@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -17,23 +20,79 @@
     "declarationMap": true,
     "sourceMap": true,
     "paths": {
-      "@nself/errors": ["./@nself/errors/src/index.ts"],
-      "@nself/sdk-core": ["./@nself/sdk-core/src/index.ts"],
-      "@nself/graphql-client": ["./@nself/graphql-client/src/index.ts"],
-      "@nself/auth-core": ["./@nself/auth-core/src/index.ts"],
-      "@nself/ui": ["./@nself/ui/src/index.ts"],
-      "@nself/observability": ["./@nself/observability/src/index.ts"],
-      "@nself/astro-preset": ["./@nself/astro-preset/src/index.ts"],
-      "@nself/tauri-bridge": ["./@nself/tauri-bridge/src/index.ts"],
-      "@nself/native-bridge": ["./@nself/native-bridge/src/index.ts"],
-      "@nself/push-client": ["./@nself/push-client/src/index.ts"],
-      "@nself/i18n": ["./@nself/i18n/src/index.ts"],
-      "@nself/config": ["./@nself/config/src/index.ts"],
-      "@nself/types": ["./@nself/types/src/index.ts"],
-      "@nself/offline-queue": ["./@nself/offline-queue/src/index.ts"],
-      "@nself/ntask-core": ["./@nself/ntask-core/src/index.ts"]
+      "@nself/errors": [
+        "./@nself/errors/src/index.ts"
+      ],
+      "@nself/sdk-core": [
+        "./@nself/sdk-core/src/index.ts"
+      ],
+      "@nself/graphql-client": [
+        "./@nself/graphql-client/src/index.ts"
+      ],
+      "@nself/auth-core": [
+        "./@nself/auth-core/src/index.ts"
+      ],
+      "@nself/ui": [
+        "./@nself/ui/src/index.ts"
+      ],
+      "@nself/observability": [
+        "./@nself/observability/src/index.ts"
+      ],
+      "@nself/astro-preset": [
+        "./@nself/astro-preset/src/index.ts"
+      ],
+      "@nself/tauri-bridge": [
+        "./@nself/tauri-bridge/src/index.ts"
+      ],
+      "@nself/native-bridge": [
+        "./@nself/native-bridge/src/index.ts"
+      ],
+      "@nself/push-client": [
+        "./@nself/push-client/src/index.ts"
+      ],
+      "@nself/i18n": [
+        "./@nself/i18n/src/index.ts"
+      ],
+      "@nself/config": [
+        "./@nself/config/src/index.ts"
+      ],
+      "@nself/types": [
+        "./@nself/types/src/index.ts"
+      ],
+      "@nself/offline-queue": [
+        "./@nself/offline-queue/src/index.ts"
+      ],
+      "@nself/ntask-core": [
+        "./@nself/ntask-core/src/index.ts"
+      ],
+      "@nself-web/ui": [
+        "./@nself-web/ui/src/index.ts"
+      ],
+      "@nself-web/csp": [
+        "./@nself-web/csp/src/index.ts"
+      ],
+      "@nself-web/og": [
+        "./@nself-web/og/src/index.ts"
+      ],
+      "@nself/tailwind-brand": [
+        "./@nself/tailwind-brand/src/index.ts"
+      ]
     }
   },
-  "include": ["@nself/**/*.ts", "@nself/**/*.tsx"],
-  "exclude": ["node_modules", "dist", ".turbo", "**/@nself/*/dist/**", "**/node_modules/**", "**/*.stories.ts", "**/*.stories.tsx"]
+  "include": [
+    "@nself/**/*.ts",
+    "@nself/**/*.tsx",
+    "@nself-web/**/*.ts",
+    "@nself-web/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".turbo",
+    "**/@nself/*/dist/**",
+    "**/node_modules/**",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/@nself-web/*/dist/**"
+  ]
 }

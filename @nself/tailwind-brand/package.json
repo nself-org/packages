@@ -1,0 +1,47 @@
+{
+  "name": "@nself/tailwind-brand",
+  "version": "0.1.0",
+  "description": "Tailwind CSS plugin for nSelf canonical brand color tokens",
+  "author": "nself-org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/tailwind-plugin.d.ts",
+      "import": "./dist/tailwind-plugin.mjs",
+      "require": "./dist/tailwind-plugin.js"
+    },
+    "./css-vars.css": "./src/css-vars.css",
+    "./stylelint-plugin": "./stylelint-plugin/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json && node scripts/build-esm.mjs",
+    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "tailwindcss": ">=3.0.0 || >=4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^2.1.9"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,8 @@
+src/
+src/__tests__/
+vitest.config.ts
+tsup.config.ts
+tsconfig.json
+*.test.ts
+*.test.tsx
+.eslintrc*
