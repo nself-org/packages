@@ -1,7 +1,7 @@
 {
   "name": "@nself/tsconfig",
-  "version": "0.0.1",
-  "description": "Canonical strict TypeScript base configs for all nSelf surfaces — extend instead of copy-pasting compilerOptions",
+  "version": "0.1.0",
+  "description": "Canonical strict TypeScript base configs for all nSelf surfaces \u2014 extend instead of copy-pasting compilerOptions",
   "private": false,
   "license": "MIT",
   "files": [

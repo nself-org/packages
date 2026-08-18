@@ -1,6 +1,6 @@
 {
   "name": "@nself/i18n",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"

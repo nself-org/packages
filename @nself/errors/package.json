@@ -1,6 +1,6 @@
 {
   "name": "@nself/errors",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Result<T,E> typed-error pattern and AppError discriminated union for nSelf",
   "main": "src/index.ts",
   "exports": {

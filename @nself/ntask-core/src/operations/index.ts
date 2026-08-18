@@ -8,3 +8,5 @@ export * from './reminders.js';
 export * from './recurring.js';
 export * from './collab.js';
 export * from './profiles.js';
+export * from './assignees.js';
+export * from './saved-views.js';

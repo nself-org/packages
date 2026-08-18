@@ -1,7 +1,7 @@
 {
   "name": "@nself/sdk-core",
-  "version": "0.0.1",
-  "description": "NselfClient base thin-client SDK for nSelf — transport abstraction, env detection, URL resolution, and typed fetch",
+  "version": "0.1.0",
+  "description": "NselfClient base thin-client SDK for nSelf \u2014 transport abstraction, env detection, URL resolution, and typed fetch",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"

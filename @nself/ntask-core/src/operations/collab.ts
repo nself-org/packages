@@ -28,6 +28,7 @@ export const GET_LIST_SHARES = /* GraphQL */`
       permission
       invited_by
       accepted_at
+      token
       source_account_id
       created_at
       updated_at

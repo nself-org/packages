@@ -1,7 +1,7 @@
 {
   "name": "@nself/push-client",
-  "version": "0.0.1",
-  "description": "Unified push notification client for nSelf — web (Web Push API) and React Native (Expo Notifications) with GraphQL backend registration",
+  "version": "0.1.0",
+  "description": "Unified push notification client for nSelf \u2014 web (Web Push API) and React Native (Expo Notifications) with GraphQL backend registration",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"

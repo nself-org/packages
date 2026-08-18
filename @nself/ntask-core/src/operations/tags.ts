@@ -3,12 +3,12 @@
  * SPORT: Part of @nself/ntask-core.
  */
 
+// $userId is intentionally omitted: np_tags select permission (role: user)
+// already filters by X-Hasura-User-Id via RLS/Hasura session var, so the
+// client never needs to pass it (matches GET_LISTS' pattern).
 export const GET_TAGS = /* GraphQL */`
-  query GetTags($userId: uuid!) {
-    np_tags(
-      where: { user_id: { _eq: $userId } }
-      order_by: { name: asc }
-    ) {
+  query GetTags {
+    np_tags(order_by: { name: asc }) {
       id
       user_id
       name

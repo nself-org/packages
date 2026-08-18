@@ -1,7 +1,7 @@
 {
   "name": "@nself/auth-core",
-  "version": "0.0.1",
-  "description": "nSelf dual-transport auth — httpOnly cookie (web) + Bearer+SecureStore (native), JWT refresh, urql authExchange",
+  "version": "0.1.0",
+  "description": "nSelf dual-transport auth \u2014 httpOnly cookie (web) + Bearer+SecureStore (native), JWT refresh, urql authExchange",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"
