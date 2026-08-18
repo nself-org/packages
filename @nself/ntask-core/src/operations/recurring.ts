@@ -76,13 +76,44 @@ export const CREATE_RECURRING_RULE = /* GraphQL */`
   }
 `;
 
+// Field set matches UpdateRecurringRuleInput (frequency/interval_count/by_day/
+// by_month_day/by_month/until_date/count_limit/end_date) — not just rrule,
+// since callers (e.g. RecurrenceSelector) update frequency/interval_count
+// directly rather than a precomputed rrule string.
 export const UPDATE_RECURRING_RULE = /* GraphQL */`
-  mutation UpdateRecurringRule($id: uuid!, $rrule: String, $endDate: date) {
+  mutation UpdateRecurringRule(
+    $id: uuid!
+    $frequency: rrule_frequency
+    $intervalCount: Int
+    $byDay: [String!]
+    $byMonthDay: [Int!]
+    $byMonth: [Int!]
+    $untilDate: date
+    $countLimit: Int
+    $endDate: date
+  ) {
     update_np_recurring_rules_by_pk(
       pk_columns: { id: $id }
-      _set: { rrule: $rrule, end_date: $endDate }
+      _set: {
+        frequency: $frequency
+        interval_count: $intervalCount
+        by_day: $byDay
+        by_month_day: $byMonthDay
+        by_month: $byMonth
+        until_date: $untilDate
+        count_limit: $countLimit
+        end_date: $endDate
+      }
     ) {
       id
+      todo_id
+      frequency
+      interval_count
+      by_day
+      by_month_day
+      by_month
+      until_date
+      count_limit
       rrule
       end_date
       updated_at

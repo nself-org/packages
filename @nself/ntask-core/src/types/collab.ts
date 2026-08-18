@@ -31,6 +31,8 @@ export interface NpListShare {
   readonly permission: MemberRole;
   readonly invited_by: string;
   readonly accepted_at: string | null;
+  /** Opaque share-link token (NULL for email-based invites — see migration 021). */
+  readonly token: string | null;
   readonly source_account_id: string;
   readonly created_at: string;
   readonly updated_at: string;

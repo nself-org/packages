@@ -10,3 +10,4 @@ export type { NpReminder, CreateReminderInput, UpdateReminderInput } from './rem
 export type { NpRecurringRule, NpRecurringInstance, CreateRecurringRuleInput, UpdateRecurringRuleInput } from './recurring.js';
 export type { NpProfile, NpUserPreferences, NotificationSettings, UpdateProfileInput, UpdatePreferencesInput } from './profile.js';
 export type { NpListMember, NpListShare, NpListPresence, NpNotification, NpDeviceToken, NpListGroup } from './collab.js';
+export type { FilterParams, NpSavedView } from './saved-view.js';

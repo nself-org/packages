@@ -1,7 +1,7 @@
 {
   "name": "@nself/tauri-bridge",
-  "version": "0.0.1",
-  "description": "Tauri 2 IPC abstraction layer — typed command invokers, window management, auto-update, and shell-open helpers for nSelf desktop apps",
+  "version": "0.1.0",
+  "description": "Tauri 2 IPC abstraction layer \u2014 typed command invokers, window management, auto-update, and shell-open helpers for nSelf desktop apps",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"

@@ -1,7 +1,7 @@
 {
   "name": "@nself/native-bridge",
-  "version": "0.0.1",
-  "description": "React Native native-module abstraction — SecureStore, push tokens, biometrics, and nclaw Rust FFI seam for nSelf mobile apps",
+  "version": "0.1.0",
+  "description": "React Native native-module abstraction \u2014 SecureStore, push tokens, biometrics, and nclaw Rust FFI seam for nSelf mobile apps",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"
@@ -28,8 +28,14 @@
     "expo-secure-store": "^14.0.0"
   },
   "peerDependenciesMeta": {
-    "expo-local-authentication": { "optional": true },
-    "expo-notifications": { "optional": true },
-    "expo-secure-store": { "optional": true }
+    "expo-local-authentication": {
+      "optional": true
+    },
+    "expo-notifications": {
+      "optional": true
+    },
+    "expo-secure-store": {
+      "optional": true
+    }
   }
 }
