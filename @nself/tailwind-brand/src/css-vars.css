@@ -1,0 +1,232 @@
+/**
+ * css-vars.css — nSelf brand tokens for Tailwind v4
+ *
+ * Import this file into your Tailwind v4 entry CSS (e.g. tailwind.css) to
+ * get all nSelf brand custom properties and @theme tokens:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@nself/tailwind-brand/css-vars.css';
+ *
+ * For Tailwind v3, use the plugin instead — see tailwind-plugin.ts.
+ *
+ * Source of truth: ~/Sites/nself/.claude/docs/brand/color-theme-standard.md
+ * SPORT F15:       ~/Sites/nself/.claude/docs/sport/F15-BRAND-SPEC.md
+ */
+
+/* ============================================================
+   :root — CSS custom properties
+   All --nself-* and --color-brand-* vars available globally.
+   ============================================================ */
+
+:root {
+  /* --- Core brand palette — LIGHT (default; dark overrides under .dark) ---
+   * Theme model: `.dark` class on <html> selects the dark palette below.
+   * Absence of `.dark` = light. Marketing sites consume these vars directly
+   * (inline `var(--color-brand-*)`), so flipping the class flips the whole site.
+   * Default render is dark (SiteLayout hardcodes class="dark" + no-flash script). */
+  --color-brand-bg:             #ffffff;   /* white — page body */
+  --color-brand-header:         #ffffff;   /* white — nav/header */
+  --color-brand-surface:        #f8fafc;   /* slate-50 — card surfaces */
+  --color-brand-surface-2:      #f1f5f9;   /* slate-100 — elevated surfaces */
+  --color-brand-primary:        #0284c7;   /* sky-600 — brand accent (AA on white) */
+  --color-brand-primary-to:     #2563eb;   /* blue-600 — gradient end */
+  --color-brand-hover:          #0369a1;   /* sky-700 — hover accent */
+  --color-brand-hover-to:       #3b82f6;   /* blue-500 — hover gradient end */
+  --color-brand-logo-from:      #38bdf8;   /* sky-400 — logo gradient start */
+  --color-brand-logo-to:        #0284c7;   /* sky-600 — logo gradient end */
+  --color-brand-ink:            #0f172a;   /* slate-900 — primary heading text */
+  --color-brand-secondary:      #334155;   /* slate-700 — body text */
+  --color-brand-muted:          #64748b;   /* slate-500 — secondary/description */
+  --color-brand-link:           #0284c7;   /* sky-600 — light-mode links */
+  --color-brand-border:         #e2e8f0;   /* slate-200 — card borders */
+  --color-brand-border-subtle:  #e5e7eb;   /* gray-200 — dividers */
+  --color-brand-cta:            #0369a1;   /* sky-700 — filled-button/badge bg behind WHITE text (~5.9:1, WCAG AA); same value in light + dark, do not use --color-brand-primary for this */
+
+  /* --- A2 redesign: page background --- */
+  --nself-page-bg-dark:         #0B0B14;   /* near-black w/ blue cast — NOT slate-950 */
+
+  /* --- A2 redesign: status tones --- */
+  --nself-status-ok-light:      rgb(52 211 153);   /* emerald-400 */
+  --nself-status-ok-dark:       rgb(5 150 105);    /* emerald-600 */
+  --nself-status-warn-light:    rgb(251 191 36);   /* amber-400 */
+  --nself-status-warn-dark:     rgb(217 119 6);    /* amber-600 */
+  --nself-status-error-light:   rgb(251 113 133);  /* rose-400 */
+  --nself-status-error-dark:    rgb(225 29 72);    /* rose-600 */
+
+  /* --- A2 redesign: pill tones (bg + text pairs) --- */
+  --nself-pill-sky-bg:          rgb(186 230 253);  /* sky-200 */
+  --nself-pill-sky-text:        rgb(7 89 133);     /* sky-800 */
+  --nself-pill-indigo-bg:       rgb(199 210 254);  /* indigo-200 */
+  --nself-pill-indigo-text:     rgb(55 48 163);    /* indigo-800 */
+  --nself-pill-green-bg:        rgb(187 247 208);  /* green-200 */
+  --nself-pill-green-text:      rgb(22 101 52);    /* green-800 */
+  --nself-pill-purple-bg:       rgb(233 213 255);  /* purple-200 */
+  --nself-pill-purple-text:     rgb(88 28 135);    /* purple-800 */
+  --nself-pill-amber-bg:        rgb(254 243 199);  /* amber-100 */
+  --nself-pill-amber-text:      rgb(146 64 14);    /* amber-800 */
+  --nself-pill-rose-bg:         rgb(254 205 211);  /* rose-200 */
+  --nself-pill-rose-text:       rgb(159 18 57);    /* rose-800 */
+  --nself-pill-slate-bg:        rgb(226 232 240);  /* slate-200 */
+  --nself-pill-slate-text:      rgb(30 41 59);     /* slate-800 */
+
+  /* --- A2 redesign: spacing rhythm --- */
+  --nself-section-y-sm:         4rem;   /* 64px — section padding-block (small screens) */
+  --nself-section-y-lg:         6rem;   /* 96px — section padding-block (large screens) */
+  --nself-footer-mt:            5rem;   /* 80px — footer top margin */
+
+  /* --- A2 redesign: border radius --- */
+  --nself-radius-pill:          calc(infinity * 1px);  /* fully rounded */
+  --nself-radius-card:          0.75rem;                /* 12px — rounded-xl */
+  --nself-radius-button:        0.5rem;                 /* 8px  — rounded-lg */
+}
+
+/* ============================================================
+   .dark — DARK palette override (sky-500 on gray-950)
+   Selected by the `.dark` class on <html>. This is the default
+   render: SiteLayout ships class="dark" + a no-flash init script
+   that flips to light only when the user opts in (nself_theme).
+   ============================================================ */
+
+.dark {
+  --color-brand-bg:             #030712;   /* gray-950 — page body */
+  --color-brand-header:         #0f172a;   /* slate-900 — nav/header */
+  --color-brand-surface:        #111827;   /* gray-900 — card surfaces */
+  --color-brand-surface-2:      #1f2937;   /* gray-800 — elevated surfaces */
+  --color-brand-primary:        #0ea5e9;   /* sky-500 — brand accent */
+  --color-brand-primary-to:     #2563eb;   /* blue-600 — gradient end */
+  --color-brand-hover:          #38bdf8;   /* sky-400 — hover accent */
+  --color-brand-hover-to:       #3b82f6;   /* blue-500 — hover gradient end */
+  --color-brand-logo-from:      #AAE4FF;   /* light cyan — logo gradient start */
+  --color-brand-logo-to:        #38bdf8;   /* sky-400 — logo gradient end */
+  --color-brand-ink:            #ffffff;   /* white — primary heading text */
+  --color-brand-secondary:      #d1d5db;   /* gray-300 — body text */
+  --color-brand-muted:          #9ca3af;   /* gray-400 — secondary/description */
+  --color-brand-link:           #38bdf8;   /* sky-400 — dark-mode links */
+  --color-brand-border:         #374151;   /* gray-700 — card borders */
+  --color-brand-border-subtle:  #1f2937;   /* gray-800 — dividers */
+  --color-brand-cta:            #0369a1;   /* sky-700 — same as light; filled-button/badge bg behind WHITE text (~5.9:1, WCAG AA) */
+}
+
+/* Base surface — flips with the active palette. Marketing sites that set an
+   inline `var(--color-brand-bg)` already follow; this guarantees the document
+   surface is correct even before page-level styles apply. */
+html {
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-ink);
+}
+
+/* ============================================================
+   @theme — Tailwind v4 design token registration
+   These are consumed by Tailwind v4's JIT engine directly.
+   Brand tokens extend (do NOT override) the default scale.
+   ============================================================ */
+
+@theme {
+  /* Brand color tokens */
+  --color-brand-bg:             var(--color-brand-bg);
+  --color-brand-header:         var(--color-brand-header);
+  --color-brand-surface:        var(--color-brand-surface);
+  --color-brand-surface-2:      var(--color-brand-surface-2);
+  --color-brand-primary:        var(--color-brand-primary);
+  --color-brand-hover:          var(--color-brand-hover);
+  --color-brand-cta:            var(--color-brand-cta);
+  --color-brand-ink:            var(--color-brand-ink);
+  --color-brand-secondary:      var(--color-brand-secondary);
+  --color-brand-muted:          var(--color-brand-muted);
+  --color-brand-link:           var(--color-brand-link);
+  --color-brand-border:         var(--color-brand-border);
+  --color-brand-border-subtle:  var(--color-brand-border-subtle);
+
+  /* A2 redesign: page bg dark */
+  --color-page-dark:            #0B0B14;
+
+  /* A2 redesign: status tones */
+  --color-status-ok-light:      var(--nself-status-ok-light);
+  --color-status-ok-dark:       var(--nself-status-ok-dark);
+  --color-status-warn-light:    var(--nself-status-warn-light);
+  --color-status-warn-dark:     var(--nself-status-warn-dark);
+  --color-status-error-light:   var(--nself-status-error-light);
+  --color-status-error-dark:    var(--nself-status-error-dark);
+
+  /* A2 redesign: pill bg tones */
+  --color-pill-sky:             var(--nself-pill-sky-bg);
+  --color-pill-indigo:          var(--nself-pill-indigo-bg);
+  --color-pill-green:           var(--nself-pill-green-bg);
+  --color-pill-purple:          var(--nself-pill-purple-bg);
+  --color-pill-amber:           var(--nself-pill-amber-bg);
+  --color-pill-rose:            var(--nself-pill-rose-bg);
+  --color-pill-slate:           var(--nself-pill-slate-bg);
+
+  /* A2 redesign: spacing rhythm */
+  --spacing-section-y-sm:       var(--nself-section-y-sm);
+  --spacing-section-y-lg:       var(--nself-section-y-lg);
+  --spacing-footer-mt:          var(--nself-footer-mt);
+
+  /* A2 redesign: border radius */
+  --radius-pill:                var(--nself-radius-pill);
+  --radius-card:                var(--nself-radius-card);
+  --radius-button:              var(--nself-radius-button);
+}
+
+/* ============================================================
+   Utility classes — emitted as @utility for Tailwind v4
+   Matches the v3 plugin's addUtilities output exactly.
+   ============================================================ */
+
+@layer utilities {
+  /* Background — core brand */
+  .bg-brand-bg        { background-color: var(--color-brand-bg); }
+  .bg-brand-header    { background-color: var(--color-brand-header); }
+  .bg-brand-surface   { background-color: var(--color-brand-surface); }
+  .bg-brand-surface-2 { background-color: var(--color-brand-surface-2); }
+  .bg-brand-primary   { background-color: var(--color-brand-primary); }
+  .bg-brand-cta       { background-color: var(--color-brand-cta); }   /* WHITE-text filled buttons/badges only — passes AA, --color-brand-primary does not */
+
+  /* A2: page background dark */
+  .bg-page-dark { background-color: var(--nself-page-bg-dark); }
+
+  /* Text — core brand */
+  .text-brand-primary   { color: var(--color-brand-primary); }
+  .text-brand-ink       { color: var(--color-brand-ink); }
+  .text-brand-secondary { color: var(--color-brand-secondary); }
+  .text-brand-muted     { color: var(--color-brand-muted); }
+  .text-brand-link      { color: var(--color-brand-link); }
+
+  /* Border — core brand */
+  .border-brand        { border-color: var(--color-brand-primary); }
+  .border-brand-card   { border-color: var(--color-brand-border); }
+  .border-brand-subtle { border-color: var(--color-brand-border-subtle); }
+
+  /* Accent / ring */
+  .accent-brand { accent-color: var(--color-brand-primary); }
+  .ring-brand   { --tw-ring-color: var(--color-brand-primary); }
+
+  /* Gradient helpers */
+  .from-brand-gradient { --tw-gradient-from: var(--color-brand-primary); }
+  .to-brand-gradient   { --tw-gradient-to: var(--color-brand-primary-to); }
+
+  /* WHITE-text gradient buttons must start from the CTA token, not brand-primary (fails contrast) */
+  .from-brand-cta-gradient { --tw-gradient-from: var(--color-brand-cta); }
+
+  /* A2: status tones */
+  .text-status-ok-light    { color: var(--nself-status-ok-light); }
+  .text-status-ok-dark     { color: var(--nself-status-ok-dark); }
+  .text-status-warn-light  { color: var(--nself-status-warn-light); }
+  .text-status-warn-dark   { color: var(--nself-status-warn-dark); }
+  .text-status-error-light { color: var(--nself-status-error-light); }
+  .text-status-error-dark  { color: var(--nself-status-error-dark); }
+
+  /* A2: pill tones (bg + text in one class) */
+  .bg-pill-sky    { background-color: var(--nself-pill-sky-bg);    color: var(--nself-pill-sky-text); }
+  .bg-pill-indigo { background-color: var(--nself-pill-indigo-bg); color: var(--nself-pill-indigo-text); }
+  .bg-pill-green  { background-color: var(--nself-pill-green-bg);  color: var(--nself-pill-green-text); }
+  .bg-pill-purple { background-color: var(--nself-pill-purple-bg); color: var(--nself-pill-purple-text); }
+  .bg-pill-amber  { background-color: var(--nself-pill-amber-bg);  color: var(--nself-pill-amber-text); }
+  .bg-pill-rose   { background-color: var(--nself-pill-rose-bg);   color: var(--nself-pill-rose-text); }
+  .bg-pill-slate  { background-color: var(--nself-pill-slate-bg);  color: var(--nself-pill-slate-text); }
+
+  /* A2: border radius */
+  .rounded-pill   { border-radius: var(--nself-radius-pill); }
+  .rounded-card   { border-radius: var(--nself-radius-card); }
+  .rounded-button { border-radius: var(--nself-radius-button); }
+}

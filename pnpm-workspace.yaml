@@ -1,2 +1,6 @@
 packages:
   - './@nself/*'
+  # Web-surface shared packages, relocated out of nself-org/web 2026-08-18 so
+  # product repos (ntask, nchat, ntv, nsentry, nfamily) can consume them without
+  # depending on a private monorepo they do not otherwise need.
+  - './@nself-web/*'

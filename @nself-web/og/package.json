@@ -1,0 +1,42 @@
+{
+  "name": "@nself-web/og",
+  "version": "0.1.0",
+  "description": "Shared OG image generation for all nself.org subdomains",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@vercel/og": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.2.3",
+    "tsup": "^8",
+    "typescript": "^6.0.3",
+    "vitest": "^3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

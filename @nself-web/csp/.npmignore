@@ -1,0 +1,9 @@
+src/
+tests/
+tsup.config.ts
+tsconfig.json
+tsconfig.tsbuildinfo
+vitest.config.ts
+.eslintrc*
+*.test.ts
+*.spec.ts
