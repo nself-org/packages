@@ -38,5 +38,14 @@
   },
   "peerDependencies": {
     "react": "^19.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nself-org/packages.git",
+    "directory": "@nself-web/og"
+  },
+  "homepage": "https://github.com/nself-org/packages/tree/main/@nself-web/og",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts"
 }
