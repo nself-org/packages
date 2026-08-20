@@ -15,3 +15,8 @@ coverage/
 .windsurf/
 .gemini/
 .codeium/
+
+# Storybook build output. 68 files / 6.2MB of generated bundles were tracked
+# here; they are regenerable via `pnpm build-storybook` and were also the source
+# of a false-positive secret finding (minified `{key:t}` reads as an API key).
+storybook-static/
