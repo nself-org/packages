@@ -24,7 +24,9 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "src/css-vars.css",
+    "stylelint-plugin"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json && node scripts/build-esm.mjs",
