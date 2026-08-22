@@ -25,11 +25,22 @@ export const GET_ATTACHMENTS = /* GraphQL */`
   }
 `;
 
+/**
+ * `bucket` is intentionally absent, and must stay absent.
+ *
+ * It is not client-insertable: getDownloadUrl honours `attachment.bucket` and
+ * then signs the key with the storage root credentials, so letting a caller
+ * choose the bucket permitted cross-bucket traversal. The Hasura insert
+ * permission drops the column and the database default ('ntask') applies.
+ * Sending it now fails with:
+ *   field 'bucket' not found in type: 'np_attachments_insert_input'
+ *
+ * `uploader_id` is likewise absent because Hasura presets it to the caller.
+ */
 export const CREATE_ATTACHMENT = /* GraphQL */`
   mutation CreateAttachment(
     $todoId: uuid!
     $storageKey: String!
-    $bucket: String!
     $fileName: String!
     $mimeType: String!
     $fileSizeBytes: bigint!
@@ -39,7 +50,6 @@ export const CREATE_ATTACHMENT = /* GraphQL */`
     insert_np_attachments_one(object: {
       todo_id: $todoId
       storage_key: $storageKey
-      bucket: $bucket
       file_name: $fileName
       mime_type: $mimeType
       file_size_bytes: $fileSizeBytes
@@ -49,6 +59,7 @@ export const CREATE_ATTACHMENT = /* GraphQL */`
       id
       todo_id
       storage_key
+      bucket
       file_name
       mime_type
       file_size_bytes
