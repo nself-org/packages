@@ -75,3 +75,37 @@ export const DELETE_ATTACHMENT = /* GraphQL */`
     }
   }
 `;
+
+/**
+ * Presigned URL actions (Hasura Actions -> backend/functions/storage-presign.ts).
+ *
+ * Upload is a three-step dance, and all three steps are required:
+ *   1. GET_UPLOAD_URL   -> presigned PUT URL + the storagePath to persist
+ *   2. PUT the bytes directly to that URL (no auth header; the signature is the
+ *      authorisation, and adding Authorization breaks it)
+ *   3. CREATE_ATTACHMENT with storage_key = the storagePath from step 1
+ *
+ * The URL is signed against the PUBLIC storage endpoint because the PUT is
+ * issued by the user's device, not from inside the backend network. Skipping
+ * step 3 leaves an orphaned object that no query will ever return.
+ *
+ * Declared as mutations: Hasura exposes both actions on the mutation root.
+ */
+export const GET_UPLOAD_URL = /* GraphQL */`
+  mutation GetUploadUrl($fileName: String!, $mimeType: String!, $todoId: String!) {
+    getUploadUrl(fileName: $fileName, mimeType: $mimeType, todoId: $todoId) {
+      uploadUrl
+      storagePath
+      expiresAt
+    }
+  }
+`;
+
+export const GET_DOWNLOAD_URL = /* GraphQL */`
+  mutation GetDownloadUrl($attachmentId: String!) {
+    getDownloadUrl(attachmentId: $attachmentId) {
+      downloadUrl
+      expiresAt
+    }
+  }
+`;

@@ -3,6 +3,8 @@ import {
   GET_ATTACHMENTS,
   CREATE_ATTACHMENT,
   DELETE_ATTACHMENT,
+  GET_UPLOAD_URL,
+  GET_DOWNLOAD_URL,
 } from '../operations/attachments.js';
 
 /**
@@ -65,5 +67,23 @@ describe('attachment operations match the np_attachments schema', () => {
 
   it('still returns bucket so callers can see what the server chose', () => {
     expect(CREATE_ATTACHMENT.slice(CREATE_ATTACHMENT.indexOf('}) {'))).toContain('bucket');
+  });
+
+  it('presign actions match the Action schema in actions.graphql', () => {
+    // getUploadUrl(fileName: String!, mimeType: String!, todoId: String!)
+    // Note todoId is String!, not uuid! — it is an Action argument, not a
+    // column, so the uuid scalar does not apply and sending uuid! fails.
+    expect(GET_UPLOAD_URL).toContain('$todoId: String!');
+    expect(GET_UPLOAD_URL).not.toContain('$todoId: uuid!');
+    for (const f of ['uploadUrl', 'storagePath', 'expiresAt']) {
+      expect(GET_UPLOAD_URL).toContain(f);
+    }
+    expect(GET_DOWNLOAD_URL).toContain('$attachmentId: String!');
+    expect(GET_DOWNLOAD_URL).toContain('downloadUrl');
+  });
+
+  it('exposes both actions as mutations', () => {
+    expect(GET_UPLOAD_URL.trimStart()).toMatch(/^mutation/);
+    expect(GET_DOWNLOAD_URL.trimStart()).toMatch(/^mutation/);
   });
 });
