@@ -27,6 +27,13 @@ export interface HeaderProps {
   accountButton?: React.ReactNode
   /** Logo home href */
   logoHref?: string
+  /**
+   * Accessible name for the logo/brand link. Override this when passing a
+   * `logo` for a different product (e.g. "ɳTask home") — the default assumes
+   * the ɳSelf brand and the `logo` SVG icon is `aria-hidden`, so its visible
+   * text is not exposed as the link's accessible name.
+   */
+  brandLabel?: string
   /** Chat URL for ɳChat link (null to hide) */
   chatUrl?: string | null
   /** Additional className for the <header> element */
@@ -65,6 +72,7 @@ export function Header({
   logo,
   accountButton,
   logoHref = 'https://nself.org',
+  brandLabel = 'ɳSelf home',
   chatUrl = 'https://chat.nself.org',
   className,
 }: HeaderProps) {
@@ -98,7 +106,7 @@ export function Header({
           <a
             href={logoHref}
             className="flex-shrink-0 text-slate-900 dark:text-white"
-            aria-label="ɳSelf home"
+            aria-label={brandLabel}
           >
             {logo ?? <Logo className="h-8 w-auto" />}
           </a>
