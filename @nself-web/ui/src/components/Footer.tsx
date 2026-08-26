@@ -33,6 +33,13 @@ export interface FooterProps {
   copyrightText?: string
   /** Logo home href */
   logoHref?: string
+  /**
+   * Accessible name for the logo/brand link. Override this for a different
+   * product (e.g. "ɳTask home") — the default assumes the ɳSelf brand and
+   * `Logo` is `aria-hidden`, so its visible text is not exposed as the
+   * link's accessible name.
+   */
+  brandLabel?: string
   /** Social links section — set to null to hide */
   social?: FooterSocialProps | null
   /** Additional className */
@@ -118,6 +125,7 @@ export function Footer({
   statusPill = defaultStatusPill,
   copyrightText = '© {year} ɳSelf · MIT licensed',
   logoHref = 'https://nself.org',
+  brandLabel = 'ɳSelf home',
   social = defaultSocial,
   className,
 }: FooterProps) {
@@ -144,7 +152,7 @@ export function Footer({
             <a
               href={logoHref}
               className="inline-block text-slate-900 dark:text-white"
-              aria-label="ɳSelf home"
+              aria-label={brandLabel}
             >
               <Logo className="h-8 w-auto" />
             </a>
