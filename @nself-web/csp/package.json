@@ -1,6 +1,7 @@
 {
   "name": "@nself-web/csp",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Content Security Policy foundation for all nSelf web subapps",
   "publishConfig": {
     "access": "public"
