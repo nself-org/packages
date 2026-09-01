@@ -63,12 +63,18 @@ importers:
       '@types/node':
         specifier: ^25.8.0
         version: 25.9.5
+      eslint:
+        specifier: ^9.32.0
+        version: 9.39.5(jiti@2.7.0)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@6.0.3)(yaml@2.9.0)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      typescript-eslint:
+        specifier: ^8
+        version: 8.67.0(eslint@9.39.5(jiti@2.7.0))(typescript@6.0.3)
       vitest:
         specifier: '>=3.2.6'
         version: 3.2.6(@types/node@25.9.5)(jiti@2.7.0)(jsdom@29.1.1)(lightningcss@1.32.0)(msw@2.14.6(@types/node@25.9.5)(typescript@6.0.3))(terser@5.48.0)(yaml@2.9.0)
@@ -82,6 +88,9 @@ importers:
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.17
+      eslint:
+        specifier: ^9.32.0
+        version: 9.39.5(jiti@2.7.0)
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -91,6 +100,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      typescript-eslint:
+        specifier: ^8
+        version: 8.67.0(eslint@9.39.5(jiti@2.7.0))(typescript@6.0.3)
       vitest:
         specifier: '>=3.2.6'
         version: 3.2.6(@types/node@25.9.5)(jiti@2.7.0)(jsdom@29.1.1)(lightningcss@1.32.0)(msw@2.14.6(@types/node@25.9.5)(typescript@6.0.3))(terser@5.48.0)(yaml@2.9.0)
@@ -405,9 +417,15 @@ importers:
         specifier: '>=3.0.0 || >=4.0.0'
         version: 4.3.3
     devDependencies:
+      eslint:
+        specifier: ^9.32.0
+        version: 9.39.5(jiti@2.7.0)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      typescript-eslint:
+        specifier: ^8
+        version: 8.67.0(eslint@9.39.5(jiti@2.7.0))(typescript@6.0.3)
       vitest:
         specifier: '>=3.2.6'
         version: 3.2.6(@types/node@25.9.5)(jiti@2.7.0)(jsdom@29.1.1)(lightningcss@1.32.0)(msw@2.14.6(@types/node@25.9.5)(typescript@6.0.3))(terser@5.48.0)(yaml@2.9.0)
@@ -8769,9 +8787,7 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
     optional: true
 
   '@react-native/normalize-colors@0.85.3': {}

@@ -143,7 +143,6 @@ export const NetworkErrorCallback: Story = {
       }}
       onNetworkError={(err) => {
         // In production: parent calls <Toast type="error" message={err.message} />
-        // eslint-disable-next-line no-alert
         alert(`onNetworkError triggered: ${err.message}`)
       }}
     >

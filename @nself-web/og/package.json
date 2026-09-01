@@ -31,9 +31,11 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "eslint": "^9.32.0",
     "react": "^19.2.3",
     "tsup": "^8",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8",
     "vitest": "^3.2.6"
   },
   "peerDependencies": {
