@@ -27,6 +27,12 @@ jobs:
         # P4-E5-W3-S05-T17: audit HIGH/CRITICAL advisories; fail on findings.
         run: pnpm audit --audit-level=high
 
+      - name: Lint
+        # Was never gated: every package carried a lint script but three of them
+        # never declared eslint, so `pnpm lint` failed with "eslint: command not
+        # found" and nothing noticed, because CI did not run it at all.
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm typecheck
 
