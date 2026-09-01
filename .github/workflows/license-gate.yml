@@ -18,6 +18,10 @@ on:
 env:
   LICENSE_GATE_MODE: fail
 
+concurrency:
+  group: license-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   license-check:
     name: Check dependency licenses
