@@ -1,0 +1,81 @@
+name: License Audit
+
+# Checks for AGPL/SSPL transitive dependencies in packages/ (Node.js/pnpm monorepo).
+# Modeled on web/.github/workflows/license-audit.yml. P6-E11-W2-S2-T14: packages/ was the
+# one repo of {cli, admin, plugins, plugins-pro, web} missing this gate — the ecosystem-wide
+# triage window already closed clean on 2026-05-03, so this joins the other 5 repos directly
+# in fail mode rather than reopening a warn-then-flip window.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  release:
+    types: [created]
+  workflow_dispatch:
+
+env:
+  LICENSE_GATE_MODE: fail
+
+jobs:
+  license-check:
+    name: Check dependency licenses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check for flagged licenses
+        run: |
+          echo "=== License Audit: packages/ ==="
+
+          # Get all licenses in JSON format
+          OUTPUT=$(pnpm licenses list --json 2>/dev/null || echo '{}')
+
+          # Check for GPL/AGPL/SSPL
+          FLAGGED=""
+          for LICENSE in "GPL-2.0" "GPL-3.0" "AGPL-3.0" "SSPL-1.0" "GPL-2.0-only" "GPL-3.0-only" "AGPL-3.0-only"; do
+            if printf '%s' "$OUTPUT" | grep -q "\"$LICENSE\""; then
+              # Check if it's in the allowlist
+              if [ -f ".license-approved" ]; then
+                PACKAGES=$(printf '%s' "$OUTPUT" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for lic, pkgs in data.items():
+            if lic == '$LICENSE':
+              for p in pkgs:
+                print(p.get('name', 'unknown'))
+          " 2>/dev/null || true)
+                for PKG in $PACKAGES; do
+                  if ! grep -q "$PKG" .license-approved 2>/dev/null; then
+                    FLAGGED="$FLAGGED\n  $PKG ($LICENSE)"
+                  fi
+                done
+              else
+                FLAGGED="$FLAGGED\n  Found $LICENSE license"
+              fi
+            fi
+          done
+
+          if [ -n "$FLAGGED" ]; then
+            printf 'GATE: Flagged licenses detected:%b\n' "$FLAGGED"
+            printf '\nAction required: remove or add to .license-approved with justification.\n'
+            if [ "$LICENSE_GATE_MODE" = "fail" ]; then
+              exit 1
+            else
+              echo "WARN-ONLY MODE: not failing PR (triage window active)"
+            fi
+          else
+            echo "PASS: All dependencies have acceptable licenses"
+          fi
