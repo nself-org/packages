@@ -1,7 +1,7 @@
 {
   "name": "@nself/ntask-core",
   "version": "0.1.0",
-  "description": "Canonical \u0273Task domain types, GraphQL operations, Zod validation schemas, and error utilities",
+  "description": "Canonical ɳTask domain types, GraphQL operations, Zod validation schemas, and error utilities",
   "private": false,
   "license": "MIT",
   "main": "src/index.ts",
