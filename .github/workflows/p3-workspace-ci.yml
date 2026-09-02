@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: p3-workspace-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     # This repo is PUBLIC, so GitHub-hosted runners are free. Keep it that way:
