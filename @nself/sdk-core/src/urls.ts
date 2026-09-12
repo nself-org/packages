@@ -4,7 +4,8 @@
  * Purpose: Provide a single canonical source of truth for nSelf API endpoint
  *          base URLs, reading from environment variables with a safe fallback.
  * Inputs:  VITE_NSELF_API_URL (Vite client) or NSELF_API_URL (Node/server) env vars.
- * Outputs: Resolved base URL string; staging URL constant.
+ * Outputs: Resolved base URL string; staging URL constant (undefined unless
+ *          explicitly configured -- no default staging host).
  * Constraints: No fetch calls here; pure URL resolution; no framework deps.
  * SPORT: F11-SUBDOMAIN-MAP.md (api.nself.org)
  */
@@ -12,8 +13,12 @@
 /** Production API base URL. */
 export const PROD_API_URL = 'https://api.nself.org' as const;
 
-/** Staging API base URL (Hetzner staging server). */
-export const STAGING_API_URL = 'http://167.235.233.65' as const;
+/**
+ * Staging API base URL. No default: the Hetzner staging server
+ * (167.235.233.65) was permanently destroyed 2026-09-12. Must be supplied
+ * via VITE_NSELF_STAGING_URL / NSELF_STAGING_URL when a staging env exists.
+ */
+export const STAGING_API_URL: string | undefined = undefined;
 
 /** Read a Vite env var safely across bundler/non-bundler envs. */
 const readViteEnv = (key: string): string | undefined => {
@@ -57,12 +62,21 @@ export const resolveApiUrl = (): string => {
 };
 
 /**
- * Resolve the staging API URL from environment variables, falling back
- * to the canonical staging server IP.
+ * Resolve the staging API URL from environment variables.
+ *
+ * Returns undefined when no staging env var is set -- there is no hardcoded
+ * fallback (the prior Hetzner staging IP was decommissioned 2026-09-12).
  */
-export const resolveStagingUrl = (): string => {
+export const resolveStagingUrl = (): string | undefined => {
   const viteUrl = readViteEnv('VITE_NSELF_STAGING_URL');
   if (viteUrl && viteUrl.length > 0) return viteUrl.replace(/\/$/, '');
+
+  const nodeUrl =
+    typeof process !== 'undefined' && process.env != null
+      ? process.env['NSELF_STAGING_URL']
+      : undefined;
+
+  if (nodeUrl && nodeUrl.length > 0) return nodeUrl.replace(/\/$/, '');
 
   return STAGING_API_URL;
 };
