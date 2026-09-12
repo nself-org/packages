@@ -220,8 +220,8 @@ describe('resolveApiUrl', () => {
     expect(PROD_API_URL).toBe('https://api.nself.org');
   });
 
-  it('STAGING_API_URL is the canonical staging IP', () => {
-    expect(STAGING_API_URL).toBe('http://167.235.233.65');
+  it('STAGING_API_URL has no hardcoded fallback (staging server decommissioned)', () => {
+    expect(STAGING_API_URL).toBeUndefined();
   });
 });
 
