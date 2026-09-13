@@ -200,6 +200,9 @@ function FooterCol({ group }: { group: FooterLinkGroup }) {
           <li key={link.label}>
             <a
               href={link.href}
+              // Distinct focus identity from the header's link to the same
+              // destination — see the matching comment in Header.tsx.
+              data-testid={`footer-${group.title}-${link.label}`}
               target={link.external ? '_blank' : undefined}
               rel={link.external ? 'noopener noreferrer' : undefined}
               className="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"

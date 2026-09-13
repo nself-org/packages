@@ -119,6 +119,13 @@ export function Header({
                 <a
                   key={item.label}
                   href={item.href}
+                  // The same destination is linked from the desktop nav, the
+                  // mobile nav and the footer. Keyboard-nav tests identify a
+                  // link by `data-testid ?? aria-label ?? href`, so without a
+                  // testid these collapse into one identity and read as a focus
+                  // trap. An aria-label would fix the test but get announced to
+                  // screen readers, so the disambiguator stays test-only.
+                  data-testid={`nav-desktop-${item.label}`}
                   target={item.external ? '_blank' : undefined}
                   rel={item.external ? 'noopener noreferrer' : undefined}
                   aria-current={active ? 'page' : undefined}
@@ -218,6 +225,7 @@ export function Header({
               <a
                 key={item.label}
                 href={item.href}
+                data-testid={`nav-mobile-${item.label}`}
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noopener noreferrer' : undefined}
                 onClick={() => setMobileOpen(false)}
