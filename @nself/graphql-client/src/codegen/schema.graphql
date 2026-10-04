@@ -1,7 +1,7 @@
-# nSelf Hasura GraphQL Schema — generated from Hasura introspection (staging 167.235.233.65)
+# nSelf Hasura GraphQL Schema — generated from Hasura introspection ($HASURA_GRAPHQL_ENDPOINT)
 #
 # DO NOT hand-edit this file. Regenerate with:
-#   HASURA_GRAPHQL_ENDPOINT=http://167.235.233.65:8080 \
+#   HASURA_GRAPHQL_ENDPOINT=http://localhost:8080 \
 #   HASURA_ADMIN_SECRET=$HASURA_STAGING_ADMIN_SECRET \
 #   pnpm --filter @nself/graphql-client codegen:live
 #

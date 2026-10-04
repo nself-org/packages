@@ -61,8 +61,8 @@ pnpm --filter @nself/graphql-client codegen
 `src/codegen/schema.graphql` is a committed SDL snapshot generated from the staging Hasura endpoint. Refresh it when tables are added or columns change:
 
 ```bash
-# Requires staging Hasura access:
-HASURA_GRAPHQL_ENDPOINT=http://167.235.233.65:8080 \
+# Requires Hasura admin access (HASURA_GRAPHQL_ENDPOINT, e.g. http://localhost:8080):
+HASURA_GRAPHQL_ENDPOINT=http://localhost:8080 \
 HASURA_ADMIN_SECRET=$HASURA_STAGING_ADMIN_SECRET \
 pnpm --filter @nself/graphql-client codegen:live
 
