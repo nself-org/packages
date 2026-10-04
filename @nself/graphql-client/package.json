@@ -4,7 +4,11 @@
   "description": "urql-based GraphQL client for nSelf \u2014 factory, exchange composition, and Hasura schema codegen pipeline",
   "main": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./admin": {
+      "browser": "./src/admin/browser.ts",
+      "default": "./src/admin/index.ts"
+    }
   },
   "private": false,
   "license": "MIT",
