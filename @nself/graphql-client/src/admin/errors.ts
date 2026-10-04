@@ -40,3 +40,15 @@ export class AdminClientConfigError extends Error {
     this.field = field;
   }
 }
+
+/**
+ * AdminClientRequestRefusedError — thrown by the client's private fetch when a
+ * request targets anything but the configured endpoint. The admin headers are
+ * never attached to such a request. The message carries no URL and no secret.
+ */
+export class AdminClientRequestRefusedError extends Error {
+  constructor() {
+    super('Admin client refused a request: the URL does not match the configured endpoint.');
+    this.name = 'AdminClientRequestRefusedError';
+  }
+}

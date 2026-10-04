@@ -176,8 +176,7 @@ describe('no secret leakage', () => {
     expect(res.error).toBeDefined();
     expect(res.error?.message).toContain('[REDACTED]');
     expect(onError).toHaveBeenCalledTimes(1);
-    const [appError, operation] = onError.mock.calls[0] as [unknown, { context: object }];
-    expect(operation.context).toHaveProperty('fetchOptions', undefined);
+    const [appError] = onError.mock.calls[0] as [unknown];
     expectNoSecret(secret, [
       ...dump('error', res.error),
       ...dump('appError', appError),

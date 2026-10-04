@@ -13,8 +13,9 @@
  *     the "browser" export condition maps it to browser.ts (always throws).
  *   - The guard runs at call time, not import time, so server bundles that
  *     tree-shake stay importable in SSR.
- *   - The secret lives only in closures. Errors, onError payloads, toString,
- *     JSON and util.inspect of the client never contain it.
+ *   - The secret lives only in closures (secure-fetch.ts). It is in no urql
+ *     context, fetchOptions or debug event. Errors, onError payloads, responses,
+ *     toString, JSON and util.inspect of the client never contain it.
  *   - No default secret and no default endpoint.
  *   - `sourceAccountId` (app wall) is never interchanged with `tenant_id`.
  * SPORT: cap:packages.admin-graphql-client (P7-ADOPT-09, EPIC ADOPT D14)
@@ -25,15 +26,17 @@ import type { AppError } from '@nself/errors';
 import { buildExchanges, type OnError } from '../exchanges.js';
 import { AdminClientConfigError, AdminClientInBrowserError } from './errors.js';
 import { makeRedactor } from './redact.js';
+import { ROLE_HEADER, SECRET_HEADER, SOURCE_ACCOUNT_HEADER, makeSecureFetch } from './secure-fetch.js';
 import type { AdminClientConfig } from './types.js';
 
-export { AdminClientConfigError, AdminClientInBrowserError } from './errors.js';
+export {
+  AdminClientConfigError,
+  AdminClientInBrowserError,
+  AdminClientRequestRefusedError,
+} from './errors.js';
 export type { AdminClientConfig } from './types.js';
 
 /** Header names owned by this client; `config.headers` may not set them. */
-const SECRET_HEADER = 'x-hasura-admin-secret';
-const ROLE_HEADER = 'x-hasura-role';
-const SOURCE_ACCOUNT_HEADER = 'x-hasura-source-account-id';
 const RESERVED = new Set([SECRET_HEADER, ROLE_HEADER, SOURCE_ACCOUNT_HEADER]);
 
 /** Latin-1 printable plus tab: what a fetch header value may hold. */
@@ -41,12 +44,22 @@ const HEADER_VALUE_OK = /^[\t\x20-\x7e\x80-\xff]*$/;
 
 /**
  * AdminOnError — onError callback accepted by createAdminClient. Receives an
- * already-redacted AppError and an Operation with `context.fetchOptions` removed.
+ * already-redacted AppError and the Operation (its context holds no secret).
  */
 export type AdminOnError = OnError;
 
 /** Config plus the optional error callback (kept off the shared config type). */
 export type AdminClientOptions = AdminClientConfig & { readonly onError?: AdminOnError };
+
+/** True when `window`, `document` or a Web/Service Worker scope exists. */
+function isBrowserLikeContext(): boolean {
+  const g = globalThis as { importScripts?: unknown };
+  return (
+    typeof globalThis.window !== 'undefined' ||
+    typeof globalThis.document !== 'undefined' ||
+    typeof g.importScripts === 'function'
+  );
+}
 
 function requireString(field: string, v: unknown, optional: boolean): string | undefined {
   if (v === undefined && optional) return undefined;
@@ -72,11 +85,21 @@ function validateUrl(v: unknown): string {
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new AdminClientConfigError('url', 'must use http or https');
   }
+  if (parsed.username !== '' || parsed.password !== '') {
+    throw new AdminClientConfigError('url', 'must not contain credentials');
+  }
   return v;
 }
 
 function validateHeaders(v: unknown): Record<string, string> {
   if (v === undefined) return {};
+  if (v instanceof Headers) {
+    const copy: Record<string, string> = {};
+    v.forEach((value, name) => {
+      copy[name] = value;
+    });
+    v = copy;
+  }
   if (typeof v !== 'object' || v === null || Array.isArray(v)) {
     throw new AdminClientConfigError('headers', 'must be an object of strings');
   }
@@ -98,9 +121,10 @@ function validateHeaders(v: unknown): Record<string, string> {
  *
  * Sends `x-hasura-admin-secret`, plus `x-hasura-role` and
  * `x-hasura-source-account-id` when given (an omitted value sends no header).
- * Uses the package exchange stack (cache, error mapping, fetch) with a redaction
- * exchange next to the transport, so a CombinedError that reaches the caller has
- * the secret scrubbed from its messages.
+ * Uses the package exchange stack (cache, error mapping, fetch). The headers are
+ * added by a private fetch closure, only for the configured endpoint, so the
+ * secret is in no urql context, fetchOptions or debug event. A redaction exchange
+ * scrubs errors that reach the caller.
  *
  * Usage:
  * ```ts
@@ -115,9 +139,7 @@ function validateHeaders(v: unknown): Record<string, string> {
  * @throws AdminClientConfigError    when the config is invalid (value never shown).
  */
 export function createAdminClient(config: AdminClientOptions): Client {
-  if (typeof globalThis.window !== 'undefined' || typeof globalThis.document !== 'undefined') {
-    throw new AdminClientInBrowserError();
-  }
+  if (isBrowserLikeContext()) throw new AdminClientInBrowserError();
   if (typeof config !== 'object' || config === null) {
     throw new AdminClientConfigError('config', 'must be an object');
   }
@@ -130,23 +152,19 @@ export function createAdminClient(config: AdminClientOptions): Client {
   const userOnError = config.onError;
   const redact = makeRedactor(secret);
 
-  // Headers are built per request inside the closure; no object holding the
-  // secret is stored on the client or on any operation context.
-  const fetchOptions = (): RequestInit => {
-    const headers: Record<string, string> = { ...extra, [SECRET_HEADER]: secret };
-    if (role !== undefined) headers[ROLE_HEADER] = role;
-    if (sourceAccountId !== undefined) headers[SOURCE_ACCOUNT_HEADER] = sourceAccountId;
-    return { headers };
-  };
+  // urql never sees the secret: it gets this private fetch, which adds the admin
+  // headers only for the configured endpoint (see secure-fetch.ts).
+  const secureFetch = makeSecureFetch({
+    url,
+    secret,
+    role,
+    sourceAccountId,
+    extra,
+    redact,
+  });
 
   const redactedOnError: OnError = (error: AppError, operation: Operation) => {
-    if (userOnError === undefined) return;
-    // The operation context carries the fetchOptions closure; hand out a copy without it.
-    const safeOp = {
-      ...operation,
-      context: { ...operation.context, fetchOptions: undefined },
-    } as unknown as Operation;
-    userOnError(redact.value(error), safeOp);
+    userOnError?.(redact.value(error), operation);
   };
 
   const redactExchange = mapExchange({
@@ -165,7 +183,7 @@ export function createAdminClient(config: AdminClientOptions): Client {
   }
   exchanges.splice(last, 0, redactExchange);
 
-  const client = new Client({ url, exchanges, fetchOptions });
+  const client = new Client({ url, exchanges, fetch: secureFetch, preferGetMethod: false });
 
   // Safe serialisation: non-enumerable so they never show up as keys.
   const label = '[nSelf AdminClient]';
