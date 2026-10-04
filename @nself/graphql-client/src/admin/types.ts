@@ -7,10 +7,12 @@
  * Inputs:  None (type only).
  * Outputs: AdminClientConfig.
  * Constraints:
- *   - Type-only module: no runtime code, no imports.
+ *   - Type-only module: no runtime code; the only import is a type (erased).
  *   - There is deliberately no default for `url` or `adminSecret`.
  * SPORT: cap:packages.admin-graphql-client (P7-ADOPT-09, EPIC ADOPT D14)
  */
+
+import type { OnError } from '../exchanges.js';
 
 /**
  * AdminClientConfig — options accepted by createAdminClient.
@@ -45,3 +47,12 @@ export interface AdminClientConfig {
    */
   readonly headers?: Readonly<Record<string, string>>;
 }
+
+/**
+ * AdminOnError — onError callback accepted by createAdminClient. Receives an
+ * already-redacted AppError and the Operation (its context holds no secret).
+ */
+export type AdminOnError = OnError;
+
+/** Config plus the optional error callback (kept off the shared config type). */
+export type AdminClientOptions = AdminClientConfig & { readonly onError?: AdminOnError };

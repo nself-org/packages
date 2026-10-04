@@ -92,7 +92,16 @@ export function makeRedactor(secret: string): Redactor {
         locations: g.locations,
       }),
     );
-    init.response = error.response;
+    if (error.response instanceof Response) {
+      // Keep status and scrubbed headers only: no body, no raw headers.
+      const headers = new Headers();
+      error.response.headers.forEach((v: string, k: string) => headers.append(k, text(v)));
+      init.response = new Response(null, {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers,
+      });
+    }
     return new CombinedError(init);
   };
 

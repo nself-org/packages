@@ -14,14 +14,18 @@
 
 import type { Client } from '@urql/core';
 import { AdminClientInBrowserError } from './errors.js';
-import type { AdminClientConfig } from './types.js';
+import type { AdminClientOptions } from './types.js';
 
-export { AdminClientInBrowserError, AdminClientConfigError } from './errors.js';
-export type { AdminClientConfig } from './types.js';
+export {
+  AdminClientInBrowserError,
+  AdminClientConfigError,
+  AdminClientRequestRefusedError,
+} from './errors.js';
+export type { AdminClientConfig, AdminClientOptions, AdminOnError } from './types.js';
 
 /**
  * createAdminClient — browser stub. Always throws AdminClientInBrowserError.
  */
-export function createAdminClient(_config: AdminClientConfig): Client {
+export function createAdminClient(_config: AdminClientOptions): Client {
   throw new AdminClientInBrowserError();
 }

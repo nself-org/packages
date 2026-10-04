@@ -172,7 +172,19 @@ describe('private fetch scope (headers only for the configured endpoint)', () =>
     expect(seen['x-hasura-admin-secret']).toBe(secret);
   });
 
-  it('refuses redirects, so the headers never follow one', async () => {
+  it('forces redirect: error, even when the caller asks to follow (S9)', async () => {
+    const secret = newSecret();
+    const spy = vi.fn((_input: unknown, _init?: RequestInit) =>
+      Promise.resolve(new Response('{"data":{}}', { headers: { 'content-type': 'application/json' } })),
+    );
+    vi.stubGlobal('fetch', spy);
+    const client = createAdminClient({ url: URL_, adminSecret: secret });
+    await client.query(QUERY, {}, { ...NET, fetchOptions: { redirect: 'follow' } }).toPromise();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0]?.[1]?.redirect).toBe('error');
+  });
+
+  it('does not follow a redirect to another host', async () => {
     const secret = newSecret();
     const elsewhere = vi.fn(() => HttpResponse.json({ data: {} }));
     server.use(
@@ -184,6 +196,35 @@ describe('private fetch scope (headers only for the configured endpoint)', () =>
     expect(res.error).toBeDefined();
     expect(elsewhere).not.toHaveBeenCalled();
     expect(everything(res.error)).not.toContain(secret);
+  });
+
+  it('passes only an allowlist of init keys to fetch: no dispatcher or agent (S6)', async () => {
+    const secret = newSecret();
+    const spy = vi.fn((_input: unknown, _init?: RequestInit) =>
+      Promise.resolve(new Response('{"data":{}}', { headers: { 'content-type': 'application/json' } })),
+    );
+    vi.stubGlobal('fetch', spy);
+    const client = createAdminClient({ url: URL_, adminSecret: secret });
+    const spyDispatcher = { dispatch: vi.fn() };
+    await client
+      .query(
+        QUERY,
+        {},
+        {
+          ...NET,
+          fetchOptions: {
+            dispatcher: spyDispatcher,
+            agent: spyDispatcher,
+            keepalive: true,
+            credentials: 'include',
+          } as RequestInit,
+        },
+      )
+      .toPromise();
+    const init = spy.mock.calls[0]?.[1] as RequestInit;
+    const allowed = new Set(['method', 'body', 'signal', 'headers', 'redirect']);
+    expect(Object.keys(init).filter((k) => !allowed.has(k))).toEqual([]);
+    expect(spyDispatcher.dispatch).not.toHaveBeenCalled();
   });
 });
 

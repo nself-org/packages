@@ -27,29 +27,20 @@ import { buildExchanges, type OnError } from '../exchanges.js';
 import { AdminClientConfigError, AdminClientInBrowserError } from './errors.js';
 import { makeRedactor } from './redact.js';
 import { ROLE_HEADER, SECRET_HEADER, SOURCE_ACCOUNT_HEADER, makeSecureFetch } from './secure-fetch.js';
-import type { AdminClientConfig } from './types.js';
+import type { AdminClientOptions } from './types.js';
 
 export {
   AdminClientConfigError,
   AdminClientInBrowserError,
   AdminClientRequestRefusedError,
 } from './errors.js';
-export type { AdminClientConfig } from './types.js';
+export type { AdminClientConfig, AdminClientOptions, AdminOnError } from './types.js';
 
 /** Header names owned by this client; `config.headers` may not set them. */
 const RESERVED = new Set([SECRET_HEADER, ROLE_HEADER, SOURCE_ACCOUNT_HEADER]);
 
 /** Latin-1 printable plus tab: what a fetch header value may hold. */
 const HEADER_VALUE_OK = /^[\t\x20-\x7e\x80-\xff]*$/;
-
-/**
- * AdminOnError — onError callback accepted by createAdminClient. Receives an
- * already-redacted AppError and the Operation (its context holds no secret).
- */
-export type AdminOnError = OnError;
-
-/** Config plus the optional error callback (kept off the shared config type). */
-export type AdminClientOptions = AdminClientConfig & { readonly onError?: AdminOnError };
 
 /** True when `window`, `document` or a Web/Service Worker scope exists. */
 function isBrowserLikeContext(): boolean {
@@ -70,6 +61,32 @@ function requireString(field: string, v: unknown, optional: boolean): string | u
     throw new AdminClientConfigError(field, 'contains characters not allowed in a header');
   }
   return v;
+}
+
+/** Placeholder values that ship in templates and examples; never a real secret. */
+const PLACEHOLDERS = new Set([
+  'changeme', 'changethis', 'password', 'secret', 'adminsecret', 'hasurasecret',
+  'hasuraadminsecret', 'admin', 'hasura', 'nhost', 'default', 'example', 'test', 'testing',
+]);
+const MIN_SECRET_LENGTH = 16;
+
+/**
+ * Reject a secret that is short or trivially weak. Short secrets also make
+ * redaction ambiguous. The message is fixed and never includes the value.
+ */
+function assertStrongSecret(secret: string): void {
+  const squashed = secret.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const weak =
+    secret.length < MIN_SECRET_LENGTH ||
+    new Set(secret).size < 5 ||
+    PLACEHOLDERS.has(squashed) ||
+    [...PLACEHOLDERS].some((w) => squashed.length > 0 && squashed.split(w).join('') === '');
+  if (weak) {
+    throw new AdminClientConfigError(
+      'adminSecret',
+      `is too weak: use at least ${MIN_SECRET_LENGTH} characters and not a placeholder`,
+    );
+  }
 }
 
 function validateUrl(v: unknown): string {
@@ -136,7 +153,9 @@ function validateHeaders(v: unknown): Record<string, string> {
  * ```
  *
  * @throws AdminClientInBrowserError when `window` or `document` is defined.
- * @throws AdminClientConfigError    when the config is invalid (value never shown).
+ * @throws AdminClientInBrowserError also in a Web/Service Worker scope (`importScripts`).
+ * @throws AdminClientConfigError    when the config is invalid, including a secret
+ *                                   under 16 characters or a placeholder (value never shown).
  */
 export function createAdminClient(config: AdminClientOptions): Client {
   if (isBrowserLikeContext()) throw new AdminClientInBrowserError();
@@ -146,6 +165,7 @@ export function createAdminClient(config: AdminClientOptions): Client {
 
   const url = validateUrl(config.url);
   const secret = requireString('adminSecret', config.adminSecret, false) as string;
+  assertStrongSecret(secret);
   const role = requireString('role', config.role, true);
   const sourceAccountId = requireString('sourceAccountId', config.sourceAccountId, true);
   const extra = validateHeaders(config.headers);

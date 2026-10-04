@@ -14,9 +14,11 @@
  *   - The three reserved headers are force-set last: per-operation fetchOptions
  *     cannot change or drop them. Role and source account are deleted when unset.
  *   - Redirects are refused (`redirect: 'error'`) so headers never follow one.
- *   - A fetch rejection is rethrown redacted; a JSON or text response has the
- *     secret scrubbed from its body and headers. Streaming responses (event
- *     stream, multipart) pass through untouched.
+ *   - Only method, body, signal, headers and redirect reach fetch (allowlist), so a
+ *     caller dispatcher or agent never sees the secret.
+ *   - A fetch rejection is rethrown redacted. Successful responses are returned
+ *     untouched. Error responses get headers scrubbed always and a JSON body
+ *     scrubbed per parsed value (see scrubError).
  * SPORT: cap:packages.admin-graphql-client (P7-ADOPT-09, EPIC ADOPT D14)
  */
 
@@ -63,15 +65,33 @@ export function makeSecureFetch(o: SecureFetchOptions): typeof fetch {
     );
   };
 
-  const scrub = async (res: Response): Promise<Response> => {
-    const type = res.headers.get('content-type') ?? '';
-    if (!/json|^text\//i.test(type)) return res; // streaming or binary: untouched
-    const headers = new Headers();
-    res.headers.forEach((value, name) => {
-      if (name !== 'content-length') headers.append(name, o.redact.text(value));
+  const scrubHeaders = (source: Headers): Headers => {
+    const out = new Headers();
+    source.forEach((value, name) => {
+      if (name !== 'content-length') out.append(name, o.redact.text(value));
     });
-    const body = NULL_BODY_STATUS.has(res.status) ? null : o.redact.text(await res.text());
-    return new Response(body, { status: res.status, statusText: res.statusText, headers });
+    return out;
+  };
+
+  // Error responses only (!ok). A successful response is returned untouched: the
+  // server never echoes the admin secret, and rewriting data would corrupt it.
+  // Headers are scrubbed whatever the content type. A JSON body is parsed and
+  // scrubbed value by value, then re-serialised; it is never rewritten as raw text
+  // unless it is not valid JSON. Streaming or binary bodies pass through.
+  const scrubError = async (res: Response): Promise<Response> => {
+    const head = { status: res.status, statusText: res.statusText, headers: scrubHeaders(res.headers) };
+    if (NULL_BODY_STATUS.has(res.status)) return new Response(null, head);
+    const type = res.headers.get('content-type') ?? '';
+    if (/json/i.test(type)) {
+      const text = await res.text();
+      try {
+        return new Response(JSON.stringify(o.redact.value(JSON.parse(text) as unknown)), head);
+      } catch {
+        return new Response(o.redact.text(text), head);
+      }
+    }
+    if (/^text\//i.test(type)) return new Response(o.redact.text(await res.text()), head);
+    return new Response(res.body, head);
   };
 
   const secureFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -87,11 +107,17 @@ export function makeSecureFetch(o: SecureFetchOptions): typeof fetch {
 
     let res: Response;
     try {
-      res = await globalThis.fetch(input, { ...init, headers, redirect: 'error' });
+      // Allowlist, not a spread: a caller-supplied dispatcher, agent or keepalive
+      // option must never receive the request that carries the secret.
+      const safe: RequestInit = { headers, redirect: 'error' };
+      if (init?.method !== undefined) safe.method = init.method;
+      if (init?.body !== undefined) safe.body = init.body;
+      if (init?.signal !== undefined) safe.signal = init.signal;
+      res = await globalThis.fetch(input, safe);
     } catch (e) {
       throw o.redact.value(e);
     }
-    return scrub(res);
+    return res.ok ? res : scrubError(res);
   };
   return secureFetch as typeof fetch;
 }
