@@ -18,14 +18,15 @@ overrides:
   immutable: '>=5.1.8'
   nanoid: '>=3.3.18'
   shell-quote: '>=1.9.0'
-  brace-expansion@1: 1.1.18
-  brace-expansion@2: 2.1.4
-  brace-expansion@3: 5.0.9
-  brace-expansion@4: 5.0.9
-  brace-expansion@5: 5.0.9
-  undici: ^7.29.0
+  brace-expansion@1: '>=1.1.20 <2'
+  brace-expansion@2: '>=2.1.6 <3'
+  brace-expansion@3: '>=5.0.11 <6'
+  brace-expansion@4: '>=5.0.11 <6'
+  brace-expansion@5: '>=5.0.11 <6'
+  undici: ^7.29.1
   vitest: '>=3.2.6'
   browserslist@<4.28.7: ^4.28.7
+  '@fastify/busboy@<3.2.1': '>=3.2.1'
 
 importers:
 
@@ -1471,8 +1472,8 @@ packages:
     resolution: {integrity: sha512-4aQzz9vgxcNXFfo/iyNgDDYfsU5XGKKxWxZopw0cVotHiW+U8IJbIxMaxsINs6bHhtkG3StKNPcOrn3eBuxKPw==}
     hasBin: true
 
-  '@fastify/busboy@3.2.0':
-    resolution: {integrity: sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA==}
+  '@fastify/busboy@3.2.2':
+    resolution: {integrity: sha512-yXSS27qPExaXeuLvMRMXOLtpipzfQYNjG3FkunDWKGfMYjKuhFXko9CVzqxm8jcF+lmtS9Fd89QNdh9XDjnbNg==}
 
   '@graphql-codegen/add@7.0.1':
     resolution: {integrity: sha512-kWw6RMu9ysBw1wcgcgf9mOnswc5M3ekOApDTiaJC/UZNTEYins01srZHYTP7z3P/WlGGC844BRtjwh3U2kNd/A==}
@@ -3091,14 +3092,14 @@ packages:
     resolution: {integrity: sha512-apC2+fspHGI3mMKj+dGevkGo/tCqVB8jMb6i+OX+E29p0Iposz07fABkRIfVUPNd5A5VbuOz1bZbnmkKLYF+wQ==}
     engines: {node: '>= 5.10.0'}
 
-  brace-expansion@1.1.18:
-    resolution: {integrity: sha512-Edep/X9fGqVNmzKBVsDYIOtD+z1tuezV70LBjdCst9Tqu76lsnvRiZ6oTic1n+/BIwX6QDGAO94PN4N2SADvtw==}
+  brace-expansion@1.1.21:
+    resolution: {integrity: sha512-9zeA+KLZNNzglF2TPKRQEDyx6Yby7daAkuy8MiPzpXPsYDWi/DRM8jmwUDxokQjYqBpv5DgPiwD4h4ZZSy1Ujw==}
 
-  brace-expansion@2.1.4:
-    resolution: {integrity: sha512-hGfVzPxthbf3+2yjg/RBs60cB0FhqBS/zvdV/4wn4/BmN0bNMMHPc4V/BbFieqf1TKAGGAHnY4eSjajCl0f2Xg==}
+  brace-expansion@2.1.7:
+    resolution: {integrity: sha512-uZbew1NqdmPDTMJ8ah1y+b+9QEJrfkXFk3RcTQw3X0jW/xRUvFKsg1CfQdSYGdTbXZWExtU3J3ccxtnfw1Fi0g==}
 
-  brace-expansion@5.0.9:
-    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -6079,8 +6080,8 @@ packages:
   undici-types@7.24.6:
     resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
 
-  undici@7.29.0:
-    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+  undici@7.30.0:
+    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
     engines: {node: '>=20.18.1'}
 
   unicode-canonical-property-names-ecmascript@2.0.1:
@@ -7692,7 +7693,7 @@ snapshots:
       abort-controller: 3.0.0
       debug: 4.4.3
       source-map-support: 0.5.21
-      undici: 7.29.0
+      undici: 7.30.0
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -7713,7 +7714,7 @@ snapshots:
       chalk: 4.1.2
       js-yaml: 5.3.0
 
-  '@fastify/busboy@3.2.0': {}
+  '@fastify/busboy@3.2.2': {}
 
   '@graphql-codegen/add@7.0.1(graphql@16.14.2)':
     dependencies:
@@ -9721,7 +9722,7 @@ snapshots:
 
   '@whatwg-node/node-fetch@0.8.6':
     dependencies:
-      '@fastify/busboy': 3.2.0
+      '@fastify/busboy': 3.2.2
       '@whatwg-node/disposablestack': 0.0.6
       '@whatwg-node/promise-helpers': 1.3.2
       tslib: 2.8.1
@@ -9976,16 +9977,16 @@ snapshots:
     dependencies:
       big-integer: 1.6.52
 
-  brace-expansion@1.1.18:
+  brace-expansion@1.1.21:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
 
-  brace-expansion@2.1.4:
+  brace-expansion@2.1.7:
     dependencies:
       balanced-match: 1.0.2
 
-  brace-expansion@5.0.9:
+  brace-expansion@5.0.12:
     dependencies:
       balanced-match: 4.0.4
 
@@ -11525,7 +11526,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.29.0
+      undici: 7.30.0
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -11552,7 +11553,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.29.0
+      undici: 7.30.0
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -12025,15 +12026,15 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.18
+      brace-expansion: 1.1.21
 
   minimatch@9.0.9:
     dependencies:
-      brace-expansion: 2.1.4
+      brace-expansion: 2.1.7
 
   minimist@1.2.8: {}
 
@@ -13334,7 +13335,7 @@ snapshots:
 
   undici-types@7.24.6: {}
 
-  undici@7.29.0: {}
+  undici@7.30.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
