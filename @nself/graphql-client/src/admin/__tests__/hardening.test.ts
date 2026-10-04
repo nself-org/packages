@@ -88,6 +88,25 @@ describe('response handling (M3, S5)', () => {
   });
 });
 
+describe('statusText scrubbing (S10)', () => {
+  it('keeps an echoed secret out of result.error.response.statusText and debug events', async () => {
+    const secret = newSecret();
+    const events: unknown[] = [];
+    server.use(
+      http.post(URL_, () =>
+        HttpResponse.json({ errors: [{ message: 'x' }] }, { status: 502, statusText: `bad ${secret}` }),
+      ),
+    );
+    const client = createAdminClient({ url: URL_, adminSecret: secret });
+    client.subscribeToDebugTarget?.((e) => events.push(e));
+    const res = await client.query(QUERY, {}, NET).toPromise();
+    const response = res.error?.response as Response;
+    expect(response.statusText).not.toContain(secret);
+    expect(everything(res.error)).not.toContain(secret);
+    expect(everything(events)).not.toContain(secret);
+  });
+});
+
 describe('weak secrets and stub parity (S7, S8)', () => {
   it.each([
     '1',
@@ -98,6 +117,13 @@ describe('weak secrets and stub parity (S7, S8)', () => {
     'aaaaaaaaaaaaaaaaaaaa',
     'abababababababababab',
     'changemechangeme',
+    'your-randomly-generated-secret-here',
+    'your-dev-secret-here',
+    'your_admin_secret_here',
+    'your-hasura-admin-secret',
+    'nself-dev-admin-secret-change-in-prod',
+    'nself-hasura-admin-secret-2026',
+    'myadminsecretkey-0123456789',
   ])('rejects the weak secret %j with a fixed message', (weak) => {
     let caught: unknown;
     try {

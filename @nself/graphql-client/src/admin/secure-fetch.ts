@@ -79,7 +79,7 @@ export function makeSecureFetch(o: SecureFetchOptions): typeof fetch {
   // scrubbed value by value, then re-serialised; it is never rewritten as raw text
   // unless it is not valid JSON. Streaming or binary bodies pass through.
   const scrubError = async (res: Response): Promise<Response> => {
-    const head = { status: res.status, statusText: res.statusText, headers: scrubHeaders(res.headers) };
+    const head = { status: res.status, statusText: o.redact.text(res.statusText), headers: scrubHeaders(res.headers) };
     if (NULL_BODY_STATUS.has(res.status)) return new Response(null, head);
     const type = res.headers.get('content-type') ?? '';
     if (/json/i.test(type)) {

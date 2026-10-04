@@ -68,6 +68,11 @@ const PLACEHOLDERS = new Set([
   'changeme', 'changethis', 'password', 'secret', 'adminsecret', 'hasurasecret',
   'hasuraadminsecret', 'admin', 'hasura', 'nhost', 'default', 'example', 'test', 'testing',
 ]);
+/** Substrings of the dev and doc placeholders shipped in nSelf's own docs and examples. */
+const PLACEHOLDER_PARTS = [
+  'changeme', 'changeinprod', 'devsecret', 'topsecret', 'myadminsecretkey',
+  'nselfdevadminsecret', 'nselfhasuraadminsecret',
+];
 const MIN_SECRET_LENGTH = 16;
 
 /**
@@ -80,6 +85,8 @@ function assertStrongSecret(secret: string): void {
     secret.length < MIN_SECRET_LENGTH ||
     new Set(secret).size < 5 ||
     PLACEHOLDERS.has(squashed) ||
+    PLACEHOLDER_PARTS.some((part) => squashed.includes(part)) ||
+    /^your[-_]/i.test(secret) ||
     [...PLACEHOLDERS].some((w) => squashed.length > 0 && squashed.split(w).join('') === '');
   if (weak) {
     throw new AdminClientConfigError(

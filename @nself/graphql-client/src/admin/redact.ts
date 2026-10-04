@@ -98,7 +98,7 @@ export function makeRedactor(secret: string): Redactor {
       error.response.headers.forEach((v: string, k: string) => headers.append(k, text(v)));
       init.response = new Response(null, {
         status: error.response.status,
-        statusText: error.response.statusText,
+        statusText: text(error.response.statusText),
         headers,
       });
     }
