@@ -14,8 +14,8 @@
 export const PROD_API_URL = 'https://api.nself.org' as const;
 
 /**
- * Staging API base URL. No default: the Hetzner staging server
- * (167.235.233.65) was permanently destroyed 2026-09-12. Must be supplied
+ * Staging API base URL. No default: the former staging server
+ * (destroyed 2026-09-12) no longer exists. Must be supplied
  * via VITE_NSELF_STAGING_URL / NSELF_STAGING_URL when a staging env exists.
  */
 export const STAGING_API_URL: string | undefined = undefined;
