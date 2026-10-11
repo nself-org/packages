@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b",
     "test": "vitest run"
   },
   "dependencies": {
@@ -18,6 +18,6 @@
   },
   "devDependencies": {
     "@types/node": "^22",
-    "vitest": "^3.2.6"
+    "vitest": "^4.1.11"
   }
 }
