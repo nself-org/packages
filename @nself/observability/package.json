@@ -21,8 +21,8 @@
     "@opentelemetry/semantic-conventions": "^1.41.0",
     "@sentry/types": "^8",
     "@types/node": "^22",
-    "@vitest/coverage-v8": "^3.2.6",
-    "vitest": "^3.2.6"
+    "@vitest/coverage-v8": "^4.1.11",
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "@opentelemetry/exporter-zipkin": ">=2",

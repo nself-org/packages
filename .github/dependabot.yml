@@ -1,0 +1,33 @@
+# Dependabot: dependency version updates for the @nself/* workspace (D-0521).
+# Same cadence and labels as the other nself-org repos.
+version: 2
+updates:
+  # directory is the pnpm workspace root: Dependabot updates the member
+  # manifests and regenerates the single root pnpm-lock.yaml in one commit.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '04:00'
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - npm
+    commit-message:
+      prefix: 'chore(deps)'
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '04:00'
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: 'ci'
+      include: scope

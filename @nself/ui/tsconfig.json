@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
+    // tsup builds this package, so rootDir only scopes the typecheck. The
+    // base paths resolve @nself/errors to its src, which sits beside ui/.
+    "rootDir": "..",
     "outDir": "dist",
     "jsx": "react-jsx",
     "composite": false,
