@@ -43,8 +43,8 @@ importers:
         specifier: ^22
         version: 22.19.21
       expo-doctor:
-        specifier: ^1.19.10
-        version: 1.19.10
+        specifier: ^1.21.4
+        version: 1.21.4
       graphql:
         specifier: ^16.9.0
         version: 16.14.2
@@ -4145,9 +4145,9 @@ packages:
       expo: '*'
       react-native: '*'
 
-  expo-doctor@1.19.10:
-    resolution: {integrity: sha512-cU9bzKzAggjQRY0P1JbGgB5G5FiQ4Rf4pNzGlx4sDDK4sCMowLWxzkIwk2pbiKLE+4+09iY5CsysWnidPLz+FA==}
-    engines: {node: ^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0}
+  expo-doctor@1.21.4:
+    resolution: {integrity: sha512-JA2TeT7/o5WmSX+DHWkf4EfgdOsJ1RnRFX5OptlMXywo88j7T4IYPRRtM5ONVSvfGH/nL/3xBmhBgJ8t4fDE9w==}
+    engines: {node: ^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0}
     hasBin: true
 
   expo-file-system@56.0.11:
@@ -11476,7 +11476,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  expo-doctor@1.19.10: {}
+  expo-doctor@1.21.4: {}
 
   expo-file-system@56.0.11(expo@56.0.12)(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7)):
     dependencies:
