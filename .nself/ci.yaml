@@ -1,0 +1,70 @@
+# nself-ci configuration for the packages repo (contract:ci.pipeline-config v1).
+#
+# Purpose: declare the jobs `nself ci` runs for this pnpm workspace, the same
+#   checks the hosted `ci` job (p3-workspace-ci.yml) runs today, so the
+#   `nself-ci` check can replace it as the merge gate (P7-CI-55).
+# Precedence: flag > env > this file > detected default (`nself ci config show`).
+# Setup: .github/workflows/nself-ci.yml installs node, pnpm and gitleaks and
+#   runs `pnpm install --frozen-lockfile` before the gate; the jobs call the
+#   tools from PATH.
+
+version: 1
+
+jobs:
+  # Declaring jobs turns catalogue detection off. Detection would plan one lint,
+  # build, test and typecheck job per workspace package through `npm run`, which
+  # is the wrong package manager here; the root scripts run them through turbo.
+  # Rule: a job here may be tuned (timeout, when.paths) but never made optional
+  # to get a green run (Epic D28).
+
+  # Secrets in git history and the working tree, with the repository rules.
+  # Git mode, not --no-git: the workflow installs node_modules before the gate,
+  # and a directory scan would read every dependency file.
+  secrets:
+    kind: static
+    run: [gitleaks, detect, --source, ., --config, .gitleaks.toml, --redact, --log-level, warn]
+    timeout: 300s
+
+  # HIGH and CRITICAL advisories fail the run. The two accepted advisories are
+  # listed in package.json under pnpm.auditConfig (P4-E5-W3-S05-T17).
+  audit:
+    kind: quality
+    run: [pnpm, audit, --audit-level=high]
+    timeout: 300s
+
+  lint:
+    kind: static
+    run: [pnpm, lint]
+    timeout: 900s
+
+  typecheck:
+    kind: static
+    run: [pnpm, typecheck]
+    timeout: 900s
+
+  test:
+    kind: test
+    run: [pnpm, test, --filter, "@nself/*"]
+    timeout: 900s
+
+  build:
+    kind: build
+    run: [pnpm, build]
+    timeout: 900s
+
+  licenses:
+    kind: quality
+    run: [pnpm, check:licenses]
+    timeout: 300s
+
+  # The committed schema snapshot is the source; no live endpoint is needed.
+  codegen-check:
+    kind: static
+    run: [pnpm, codegen:check]
+    timeout: 600s
+
+  # Fails while src/codegen/schema.graphql is still the placeholder skeleton.
+  schema-check:
+    kind: static
+    run: [pnpm, --filter, "@nself/graphql-client", "schema:check"]
+    timeout: 300s
