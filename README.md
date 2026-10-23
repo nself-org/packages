@@ -1,7 +1,7 @@
 # @nself packages
 
 Shared TypeScript libraries for the [nSelf](https://nself.org) apps — ɳTask,
-ɳChat, ɳTV, ɳFamily, ɳSentry and ClawDE.
+ɳChat, ɳFamily, ɳSentry and ClawDE.
 
 These live here rather than inside any one product so every app can depend on
 them without depending on each other, and so a self-hosted install of an app
