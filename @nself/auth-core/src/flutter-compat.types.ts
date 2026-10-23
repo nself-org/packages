@@ -1,7 +1,7 @@
 /**
- * flutter-compat.types.ts — Flutter SDK auth shim type definitions.
+ * flutter-compat.types.ts — Legacy Dart auth shim type definitions.
  *
- * Purpose: Public type contracts for the FlutterSDK-compatible auth shim.
+ * Purpose: Public type contracts for the legacy Dart auth compatibility shim.
  *          Extracted from flutter-compat.ts to respect the 300-line file cap.
  *
  * Inputs:  None — pure type declarations.
@@ -20,7 +20,7 @@
 /**
  * FlutterAuthUser — minimal authenticated user model.
  *
- * Mirrors the Flutter SDK FlutterAuthUser. All fields are readonly to
+ * Mirrors FlutterAuthUser from the retired Dart SDK. All fields are readonly to
  * prevent accidental mutation; produce new objects via spread.
  */
 export interface FlutterAuthUser {

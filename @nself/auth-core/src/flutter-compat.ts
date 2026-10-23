@@ -1,5 +1,5 @@
 /**
- * flutter-compat.ts — Flutter SDK auth shim public facade.
+ * flutter-compat.ts — Legacy Dart auth shim public facade.
  *
  * Purpose: Public-API barrel for the Flutter-compatible auth shim. Exports
  *          all types, error classes, and the NSelfAuthCompat singleton.
@@ -46,7 +46,7 @@ let _instance: NSelfAuthCompatImpl | null = null;
 // ─── Public Singleton API ──────────────────────────────────────────────────
 
 /**
- * NSelfAuthCompat — Flutter SDK compatible auth singleton.
+ * NSelfAuthCompat — Legacy Dart auth compatibility singleton.
  *
  * Purpose: Stable public API surface for the Flutter-compat shim.
  *          Delegates all operations to NSelfAuthCompatImpl. Callers never
