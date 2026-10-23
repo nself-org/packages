@@ -14,8 +14,8 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: [
         'src/**/__tests__/**',
-        // flutter-compat.ts is a compatibility shim (544 lines) — excluded from coverage
-        // to keep overall threshold achievable without porting Flutter SDK internals.
+        // flutter-compat.ts is a legacy compatibility facade — excluded from coverage
+        // to keep overall threshold achievable without porting retired Dart SDK internals.
         'src/flutter-compat.ts',
         // index.ts is a pure re-export barrel — no runtime logic to cover.
         'src/index.ts',

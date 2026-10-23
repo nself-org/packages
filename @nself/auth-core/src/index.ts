@@ -56,7 +56,7 @@ export {
 } from './provider.js';
 export type { NselfAuthProviderProps } from './provider.js';
 
-// Flutter SDK compatibility layer (for app SDKs consuming plugins-pro/paid/auth/flutter)
+// Legacy Dart auth compatibility layer (for existing app SDK consumers)
 export { NSelfAuthCompat } from './flutter-compat.js';
 export type {
   FlutterAuthUser,

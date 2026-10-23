@@ -26,7 +26,7 @@ export type BundleId =
   | 'nclaw'      // ɳClaw — AI assistant (email, calendar, news, budget)
   | 'nchat'      // ɳChat — team chat + live video
   | 'nfamily'    // ɳFamily — family social (PLANNED v1.1.0)
-  | 'ntv'        // ɳTV — media downloading, streaming, metadata
+  | 'ntv'        // Legacy identifier for the cancelled TV app
   | 'clawde'     // ClawDE — AI dev environment cloud sync
   | 'nsentry'    // ɳSentry — observability & incident management (PLANNED v1.1.0)
   | 'ntask'      // ɳTask — free bundle (free plugins only, $0)
