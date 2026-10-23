@@ -28,8 +28,11 @@
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.28.1",
-      "vite": ">=6.4.3",
-      "dompurify": ">=3.4.16",
+      "storybook@<8.6.19": ">=8.6.19 <9",
+      "@storybook/core@<8.6.19": ">=8.6.19 <9",
+      "@vitest/mocker@<4.1.12": ">=4.1.12",
+      "vite@<6.4.4": ">=6.4.4 <7",
+      "dompurify": ">=3.4.17",
       "uuid": ">=11.1.1",
       "@opentelemetry/core": ">=2.8.0",
       "postcss": ">=8.5.18",
