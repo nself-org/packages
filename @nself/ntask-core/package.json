@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Canonical ɳTask domain types, GraphQL operations, Zod validation schemas, and error utilities",
   "private": false,
+  "sideEffects": false,
   "license": "MIT",
   "main": "src/index.ts",
   "exports": {
