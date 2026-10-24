@@ -6,7 +6,7 @@
 import { z } from 'zod';
 
 export const createSubtaskSchema = z.object({
-  todo_id: z.string().uuid(),
+  todo_id: z.uuid(),
   title: z.string().min(1, 'Title is required').max(500),
   position: z.number().int().min(0).optional(),
 });

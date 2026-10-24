@@ -14,7 +14,7 @@ export const createListSchema = z.object({
   color: hexColorSchema.optional(),
   icon: z.string().max(50).optional(),
   description: z.string().max(2000).optional(),
-  group_id: z.string().uuid().optional(),
+  group_id: z.uuid().optional(),
   position: z.number().int().min(0).optional(),
 });
 
@@ -24,7 +24,7 @@ export const updateListSchema = z.object({
   icon: z.string().max(50).optional(),
   description: z.string().max(2000).optional(),
   position: z.number().int().min(0).optional(),
-  group_id: z.string().uuid().nullable().optional(),
+  group_id: z.uuid().nullable().optional(),
 });
 
 export type CreateListData = z.infer<typeof createListSchema>;
