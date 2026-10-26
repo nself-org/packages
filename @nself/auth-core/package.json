@@ -31,7 +31,7 @@
   "devDependencies": {
     "@nself/graphql-client": "workspace:*",
     "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/user-event": "^14.6.8",
     "@types/react": "^18",
     "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^29.1.1",
