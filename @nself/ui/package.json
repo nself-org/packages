@@ -50,7 +50,7 @@
     "@testing-library/user-event": "^14",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^4",
+    "@vitejs/plugin-react": "^6",
     "jsdom": "^25",
     "tsup": "^8",
     "typescript": "^6.0.3",
