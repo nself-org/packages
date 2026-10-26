@@ -60,7 +60,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4",
-    "eslint": "^9.32.0",
+    "eslint": "^10.13.0",
     "jsdom": "^25",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
