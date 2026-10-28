@@ -116,5 +116,6 @@ regexes = [
   '''Access Group [A-Z]: crypto/handshake''',
   # Security-header tables use `key: '<Header-Name>'`; a header name is not a
   # credential. Bounded to the known header set rather than any `key:` literal.
-  '''key: '(Referrer|Permissions|Content-Security|Cross-Origin[a-zA-Z-]*|Strict-Transport|X-[A-Za-z-]+)-?[A-Za-z-]*'''',
+  # Use a hex escape for the closing apostrophe for gitleaks 8.21.2 TOML compatibility.
+  '''key: '(Referrer|Permissions|Content-Security|Cross-Origin[a-zA-Z-]*|Strict-Transport|X-[A-Za-z-]+)-?[A-Za-z-]*\x27''',
 ]
