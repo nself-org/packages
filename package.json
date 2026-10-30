@@ -28,6 +28,7 @@
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.28.1",
+      "satori": "0.33.5",
       "storybook@<8.6.19": ">=8.6.19 <9",
       "@storybook/core@<8.6.19": ">=8.6.19 <9",
       "@vitest/mocker@<4.1.12": ">=4.1.12",
