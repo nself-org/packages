@@ -54,7 +54,9 @@
       "@fastify/busboy@<3.2.1": ">=3.2.1",
       "source-map-js": ">=1.2.2",
       "compression": ">=1.8.2",
-      "@expo/cli>zod": "^4.6.7"
+      "@expo/cli>zod": "^4.6.7",
+      "fflate@<0.7.5": "^0.7.5",
+      "node-forge": ">=1.4.1"
     },
     "auditConfig": {
       "ignoreGhsas": [
