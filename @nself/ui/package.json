@@ -41,7 +41,7 @@
     "@nself/i18n": "workspace:*",
     "@nself/observability": "workspace:*",
     "storybook": "^8",
-    "@storybook/react": "^8",
+    "@storybook/react": "^10",
     "@storybook/react-vite": "^8",
     "@storybook/addon-essentials": "^8",
     "@storybook/addon-a11y": "^8",
