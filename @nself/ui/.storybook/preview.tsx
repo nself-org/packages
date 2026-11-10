@@ -1,11 +1,12 @@
 /**
- * Storybook preview — global decorators and parameters for @nself/ui stories.
+ * Storybook preview: global parameters for @nself/ui stories.
+ * Storybook 9+ API: backgrounds use `options` plus `initialGlobals`, and the
+ * actions `argTypesRegex` matcher is gone (use `fn()` from `storybook/test`).
  */
 import type { Preview } from '@storybook/react';
 
 const preview: Preview = {
   parameters: {
-    actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -13,13 +14,15 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: 'light',
-      values: [
-        { name: 'light', value: '#ffffff' },
-        { name: 'dark',  value: '#0f172a' },
-        { name: 'surface', value: '#f8fafc' },
-      ],
+      options: {
+        light: { name: 'light', value: '#ffffff' },
+        dark: { name: 'dark', value: '#0f172a' },
+        surface: { name: 'surface', value: '#f8fafc' },
+      },
     },
+  },
+  initialGlobals: {
+    backgrounds: { value: 'light' },
   },
 };
 
