@@ -2,6 +2,7 @@
  * Input stories — states and variants.
  */
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
 import { Input } from '../Input.js';
 
 const meta = {
@@ -12,6 +13,7 @@ const meta = {
   args: {
     label: 'Label',
     placeholder: 'Enter a value',
+    onChange: fn(),
   },
 } satisfies Meta<typeof Input>;
 
