@@ -7,12 +7,15 @@ const meta: Meta<typeof Header> = {
   parameters: {
     layout: 'fullscreen',
     backgrounds: {
-      default: 'dark',
-      values: [
-        { name: 'dark', value: '#0F0F1A' },
-        { name: 'light', value: '#f8fafc' },
-      ],
+      options: {
+        dark: { name: 'dark', value: '#0F0F1A' },
+        light: { name: 'light', value: '#f8fafc' },
+      },
     },
+  },
+  // Storybook 9+ picks the starting background from globals, not parameters.
+  globals: {
+    backgrounds: { value: 'dark' },
   },
   tags: ['autodocs'],
 }
@@ -22,7 +25,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    currentPath: undefined,
     githubStars: 342,
   },
 }
@@ -50,7 +52,8 @@ export const WithAccountButton: Story = {
 export const NoGitHub: Story = {
   name: 'Without GitHub badge',
   args: {
-    githubUrl: undefined,
+    // An empty URL hides the badge; undefined would fall back to the default repo.
+    githubUrl: '',
     githubStars: null,
   },
 }

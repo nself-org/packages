@@ -1,7 +1,10 @@
 /**
  * Storybook preview: global parameters for @nself/ui stories.
- * Storybook 9+ API: backgrounds use `options` plus `initialGlobals`, and the
- * actions `argTypesRegex` matcher is gone (use `fn()` from `storybook/test`).
+ * Storybook 9+ API: backgrounds use `options` plus `initialGlobals`.
+ * Actions: `actions.argTypesRegex` still exists but is not recommended, and
+ * react-docgen does not infer the handlers that Button and Input inherit
+ * from the HTML attribute types. The stories assign `fn()` from
+ * `storybook/test` to their handlers instead, so the Actions panel logs them.
  */
 import type { Preview } from '@storybook/react';
 
